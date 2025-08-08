@@ -9,13 +9,13 @@
 
 % to compile a preprint version, e.g., for submission to arXiv, add add the
 % [preprint] option:
-%     \usepackage[preprint]{tackling_climate_workshop_style}
+    \usepackage[preprint]{tackling_climate_workshop_style}
 
 % to compile a camera-ready version, add the [final] option, e.g.:
 %     \usepackage[final]{tackling_climate_workshop_style}
 
 % to avoid loading the natbib package, add option nonatbib:
-     \usepackage[nonatbib]{tackling_climate_workshop_style}
+     % \usepackage[nonatbib]{tackling_climate_workshop_style}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -26,7 +26,9 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 
-\title{\textit{Formatting instructions for} Tackling Climate Change with Machine Learning: workshop at NeurIPS 2025}
+\usepackage{amsmath}
+
+\title{Interactive Atmospheric Composition Emulation for Next-Generation Earth System Models}
 
 % The \author macro works with any number of authors. There are two commands
 % used to separate the names and addresses of multiple authors: \And and \AND.
@@ -37,34 +39,39 @@
 % \AND instead of \And before the third author name.
 
 \author{%
-  David S.~Hippocampus\thanks{Use footnote for providing further information
-    about author (webpage, alternative address)---\emph{not} for acknowledging
-    funding agencies.} \\
-  Department of Computer Science\\
-  Cranberry-Lemon University\\
-  Pittsburgh, PA 15213 \\
-  \texttt{hippo@cs.cranberry-lemon.edu} \\
-  % examples of more authors
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \AND
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
+    Mohammad H. Erfani\thanks{Corresponding author (\texttt{se2639@columbia.edu})} \\
+    Center for Climate Systems Research\\
+    Columbia University\\
+    New York, NY 10025 \\
+    % \\
+    \And
+    Kara D. Lamb \\
+    Department of Earth and Environmental Engineering \\
+    Columbia University \\
+    New York, NY 10027\\
+    % \texttt{kl3231@columbia.edu} \\
+    \And
+    Susanne E. Bauer \\
+    NASA Goddard Institute for Space Studies\\
+    New York, NY 10025 \\
+    % \texttt{susanne.e.bauer@nasa.gov} \\
+    \And
+    Kostas Tsigaridis \\
+    Center for Climate Systems Research\\
+    Columbia University\\
+    New York, NY 10025 \\
+    % \texttt{kt2347@columbia.edu} \\
+    \And
+    Marcus van Lier-Walqui\\
+    Center for Climate Systems Research\\
+    Columbia University\\
+    New York, NY 10025\\
+    % \texttt{mv2525@columbia.edu} \\
+    \And
+    Gavin Schmidt\\
+    NASA Goddard Institute for Space Studies\\
+    New York, NY 10025 \\
+    % \texttt{gavin.a.schmidt@nasa.gov} \\
 }
 
 \begin{document}
@@ -72,365 +79,74 @@
 \maketitle
 
 \begin{abstract}
-  The abstract paragraph should be indented \nicefrac{1}{2}~inch (3~picas) on
-  both the left- and right-hand margins. Use 10~point type, with a vertical
-  spacing (leading) of 11~points.  The word \textbf{Abstract} must be centered,
-  bold, and in point size 12. Two line spaces precede the abstract. The abstract
-  must be limited to one paragraph.
+    Interactive composition simulations are computationally expensive in Earth System Models (ESMs) because they transport numerous gaseous and aerosol tracers each time step. This limits higher-resolution transient climate simulations with current computational resources. ESMs like NASA GISS-E3 often use pre-computed monthly-averaged atmospheric composition concentrations (Non-Interactive Tracers or NINT) to reduce computational costs. While NINT significantly cuts computational demands, it fails to capture real-time feedback between aerosols and other climate processes by relying on pre-calculated fields. We extended the GISS ModelE NINT version using machine learning (ML) to create ``Smart NINT,'' which emulates interactive emissions. Smart NINT interactively calculates concentrations using ML with surface emissions and meteorological data as inputs, avoiding full physics parameterizations. Our approach utilizes spatiotemporal architecture that possess well-matched inductive bias to effectively capture the spatial and temporal dependencies in tracer evolution. Input data include prognostic/diagnostic quantities for horizontal advection, vertical convection, and sink/source terms, processed through the first 20 vertical levels (up to 600 hPa) using ModelE OMA scheme. This vertical range covers nearly the entire BCB concentration distribution in the troposphere. Our evaluation shows excellent model performance with R$^2$ values exceeding 0.93 and Pearson correlation coefficients above 0.97 at the first pressure level. This high performance continues through level 15 (800 hPa), then gradually decreases as BCB concentrations drop significantly. The model maintains acceptable performance even when tested on data from entirely different time periods outside the training domain, which is a crucial capability for climate modeling applications requiring reliable long-term projections. These results confirm that our approach successfully shifts the paradigm from simple numerical solver mimicry to spatio-temporal modeling, offering significant improvements in forecasting capability for long-term climate simulations.
 \end{abstract}
 
-\section{About the workshop}
-
- Many in the ML community wish to take action on climate change, but are unsure of the pathways through which they can have the most impact. This workshop highlights work that demonstrates that, while no silver bullet, ML can be an invaluable tool in reducing greenhouse gas emissions and in helping society adapt to the effects of climate change. Climate change is a complex problem, for which action takes many forms - from theoretical advances to deployment of new technology. Many of these actions represent high-impact opportunities for real-world change, and are simultaneously interesting academic research problems.
- 
- This workshop is part of a series (ICLR 2025, NeurIPS 2024, ICLR 2024, NeurIPS 2023, ICLR 2023, NeurIPS 2022, ICML 2021, NeurIPS 2021, NeurIPS 2020, ICLR 2020, NeurIPS 2019, and ICML 2019). For this iteration of the workshop, we invite submissions based on the theme of \textbf{\textit{Roots and Routes: A Dialogue on Different Machine Learning Methods for Climate Impact}}. We invite participants to explore the rich landscape of machine learning methods applied to climate action, spanning both established techniques and cutting-edge innovations. In an era where `frontier' deep learning models often dominate the conversation, we aim to create space for thoughtful discussion on a broader range of approaches, including classical ML approaches while providing educational materials to serve as entry points for newcomers. We will examine the trade-offs between different methodologies, considering their effectiveness in both research settings and real-world applications. Through this dialogue, we hope to foster a deeper understanding of what works, where, and why in the pursuit of impactful climate solutions. Submitted works may be on any topic of relevance at the intersection of climate change and machine learning.
- 
-\section{Submission of papers}
-
-Electronic submissions are required, via this submission website:
-\begin{center}
-  \url{https://cmt3.research.microsoft.com/CCAINeurIPS2025/}
-\end{center}
-
-Please read the instructions below carefully and follow them faithfully.
-
-\section{Tracks}
-
-There are three tracks for submissions: \textbf{Papers, Proposals, and Tutorial}s, each described in detail below.  Submissions are limited to \textbf{4 pages for the Papers track}, and \textbf{3 pages for the Proposals track}. Tutorials do not have a page limit. References do not count towards this total. Supplementary appendices are allowed but will be read at the discretion of the reviewers. All submissions must explain why the proposed work has (or could have) positive impacts regarding climate change.
-
-\subsubsection{Papers}
-
-\textit{Work that is in progress, published, and/or deployed.}
-
-Submissions for the Papers track should describe projects relevant to climate change that involve machine learning. These may include (but are not limited to) academic research; deployed results from startups, industry, public institutions, etc.; and climate-relevant datasets.
-
-Submissions should provide experimental or theoretical validation of the method presented, as well as specifying what gap the method fills. Authors should clearly illustrate a pathway to climate impact, i.e., identify the way in which this work fits into broader efforts to address climate change. Algorithms need not be novel from a machine learning perspective if they are applied in a novel setting. Details of methodology need not be revealed if they are proprietary, though transparency is highly encouraged.
-
-Submissions creating novel datasets are welcomed. Datasets should be designed to permit machine learning research (e.g. formatted with clear benchmarks for evaluation). In this case, baseline experimental results on the dataset are preferred, but not required.
-
-Submissions are limited to 4 pages. References do not count toward this total. Submissions are due August 20, 2025.
-
-\subsubsection{Proposals}
-
-\textit{Early-stage work and detailed descriptions of ideas for future work.}
-
-Submissions for the Proposals track should describe detailed ideas for how machine learning can be used to solve climate-relevant problems. While less constrained than the Papers track, Proposals will be subject to a very high standard of review. Ideas should be justified as extensively as possible, including motivation for why the problem being solved is important in tackling climate change, discussion of why current methods are inadequate, explanation of the proposed method, and discussion of the pathway to climate impact. Preliminary results are optional.
-
-Submissions are limited to 3 pages. References do not count toward this total. Submissions are due August 20, 2025.
-
-\subsubsection{Tutorials}
-\textit{Interactive notebooks for insightful step-by-step walkthroughs.}
-
-Submissions for the Tutorials track should introduce or demonstrate the use of ML methods and tools such as libraries, packages, services, datasets, or frameworks to address a problem related to climate change. Tutorial submissions should include a clear and concise description of users' expected learning outcomes. Tutorial submissions are due on August 20, with acceptance notification on September 22. Following acceptance, tutorial creators will collaborate with the Tutorials Team, who will review the tutorials and provide iterative feedback, while the creators continue to develop and improve their work by the final submission date (Nov 15). Tutorial submissions (due Aug 20) and camera-ready tutorial submissions (due Nov 15) should be in the form of executable notebooks (e.g. Jupyter, Colab) with a separate \texttt{requirements.txt} for users who would like to run their notebook locally. Submissions will be reviewed based on their potential impact and overall usability by the climate and AI research community.
-
-
-\subsection{Style}
-
-Papers must be prepared according to the instructions presented here.   Submissions are limited to \textbf{4 pages for the Papers track}, and \textbf{3 pages for the Proposals track}. Tutorials do not have a page limit. Papers that exceed these page limits will not be reviewed, or in any other way considered for presentation at the workshop.
-
-
-Authors are required to use the workshop style files (modified from the NeurIPS style files), obtainable on the website as indicated below. Please make sure you use the current files and not previous versions. Tweaking the style files may be grounds for
-rejection.
-
-\subsection{Retrieval of style files}
-
-The style files for this workshop are available on
-the World Wide Web at
-\begin{center}
-  \url{http://climatechange.ai/files/TCCML_NeurIPS_2025_Style_File.zip} %TODO UPDATE THIS
-\end{center}
-The file \verb+tackling_climate_workshop.pdf+ contains these instructions and illustrates the
-various formatting requirements your paper must satisfy.
-
-The file \verb+tackling_climate_workshop.tex+ may be used as a “shell” for writing your paper. Alternatively, the file \verb+tackling_climate_workshop.docx+ can be used as well. Replace the author, title, abstract, and text of the paper with your own. Please remember that at submission time your document should be anonymized and the only accepted format is PDF.
-
-The only supported style file for \LaTeX{} is \verb+tackling_climate_workshop_style.sty+,
-rewritten for \LaTeXe{}.  \textbf{Previous style files for \LaTeX{} 2.09, or NeurIPS conference style file, are not accepted.}
-
-The \LaTeX{} style file contains three optional arguments: \verb+final+, which
-creates a camera-ready copy, \verb+preprint+, which creates a preprint for
-submission to, e.g., arXiv, and \verb+nonatbib+, which will not load the
-\verb+natbib+ package for you in case of package clash.
-
-\paragraph{Preprint option}
-If you wish to post a preprint of your work online, e.g., on arXiv, using the workshop style, please use the \verb+preprint+ option. This will create a
-nonanonymized version of your work with the text ``Preprint. Work in progress.''
-in the footer. This version may be distributed as you see fit. Please \textbf{do
-  not} use the \verb+final+ option, which should \textbf{only} be used for
-papers accepted to the workshop. Note that all workshops are non-archival; submission does not preclude future publication.
-
-At submission time, please omit the \verb+final+ and \verb+preprint+
-options. This will anonymize your submission and add line numbers to aid
-review. Please do \emph{not} refer to these line numbers in your paper as they
-will be removed during generation of camera-ready copies.
-
-The file \verb+tackling_climate_workshop.tex+ may be used as a ``shell'' for writing your
-paper. Replace the author, title, abstract, and text of
-the paper with your own.
-
-The formatting instructions contained in these style files are summarized in
-Sections \ref{gen_inst}, \ref{headings}, and \ref{others} below.
-
-\section{General formatting instructions}
-\label{gen_inst}
-
-The text must be confined within a rectangle 5.5~inches (33~picas) wide and
-9~inches (54~picas) long. The left margin is 1.5~inch (9~picas).  Use 10~point
-type with a vertical spacing (leading) of 11~points.  Times New Roman is the
-preferred typeface throughout, and will be selected for you by default.
-Paragraphs are separated by \nicefrac{1}{2}~line space (5.5 points), with no
-indentation.
-
-The paper title should be 17~point, initial caps/lower case, bold, centered
-between two horizontal rules. The top rule should be 4~points thick and the
-bottom rule should be 1~point thick. Allow \nicefrac{1}{4}~inch space above and
-below the title to rules. All pages should start at 1~inch (6~picas) from the
-top of the page.
-
-The version of the paper submitted for review should have "Anonymous Author(s)" as the author of the paper. 
-For the final version, authors' names are set in boldface, and each name is
-centered above the corresponding address. The lead author's name is to be listed
-first (left-most), and the co-authors' names (if different address) are set to
-follow. If there is only one co-author, list both author and co-author side by
-side.
-
-Please pay special attention to the instructions in Section \ref{others}
-regarding figures, tables, acknowledgments, and references.
-
-\section{Headings: first level}
-\label{headings}
-
-All headings should be lower case (except for first word and proper nouns),
-flush left, and bold.
-
-First level headings are in point size 12. One line space before the first level heading and \nicefrac{1}{2} line space after the first level heading.
-
-\subsection{Headings: second level}
-
-Second level headings are in point size 10. One line space before the second level heading and \nicefrac{1}{2} line space after the second level heading.
-
-\subsubsection{Headings: third level}
-
-Third level headings are in point size 10. One line space before the third level heading and \nicefrac{1}{2} line space after the third level heading. 
-
-\paragraph{Paragraphs}
-
-In \LaTeX{} there is also a \verb+\paragraph+ command available, which sets the heading in bold, flush left, and inline with the text, with the heading followed by 1\,em of space. If using this style option in a \verb+docx+ file, please follow these instructions accordingly.
-
-\section{Citations, figures, tables, references}
-\label{others}
-
-These instructions apply to everyone, regardless of the formatter being used.
-
-\subsection{Citations within the text}
-
-Citations within the text should be numbered consecutively.  The corresponding number is to appear enclosed in square brackets, such as [1] or [2]-[5].  The corresponding references are to be listed in the same order at the end of the paper, in the \textbf{References} section. (Note: the standard
-\textsc{Bib\TeX} style \texttt{unsrt} produces this.) As to the format of the references themselves, any standard reference style is acceptable, as long as it is used consistently.
-
-
-As submission is double blind, refer to your own published work in the third
-person. That is, use ``In the previous work of Jones et al.\ [4],'' not ``In our
-previous work [4].'' If you cite your other papers that are not widely available
-(e.g., a journal paper under review), use anonymous author names in the
-citation, e.g., an author of the form ``A.\ Anonymous.''
-
-When using the \LaTeX{} template, the \verb+natbib+ package will be loaded for you by default.  Citations may be author/year or numeric, as long as you maintain internal consistency.
-
-For \LaTeX{} use, note that the documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations appropriate for
-use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-If you wish to load the \verb+natbib+ package with options, you may add the
-following before loading the \verb+neurips_2020+ package:
-\begin{verbatim}
-   \PassOptionsToPackage{options}{natbib}
-\end{verbatim}
-
-If \verb+natbib+ clashes with another package you load, you can add the optional
-argument \verb+nonatbib+ when loading the style file:
-\begin{verbatim}
-   \usepackage[nonatbib]{tackling_climate_workshop_style}
-\end{verbatim}
-
-\subsection{Footnotes}
-
-Footnotes should be used sparingly.  If you do require a footnote, indicate
-footnotes with a number\footnote{Sample of the first footnote.} in the
-text. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a horizontal rule of 2~inches (12~picas).
-
-Note that footnotes are properly typeset \emph{after} punctuation
-marks.\footnote{As in this example.}
-
-\subsection{Figures}
-
-\begin{figure}
-  \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
-\end{figure}
-
-All artwork must be neat, clean, and legible. Lines should be dark enough for
-purposes of reproduction. The figure number and caption always appear after the
-figure. Place one line space before the figure caption and one line space after
-the figure. The figure caption should be lower case (except for first word and
-proper nouns); figures are numbered consecutively.
-
-Make sure the figure caption does not get separated from the figure. Leave sufficient space to avoid splitting the figure and figure caption.
-
-You may use color figures.  However, it is best for the figure captions and the
-paper body to be legible if the paper is printed in either black/white or in
-color, and that colormaps consider accessibility to the visually impaired (e.g. red/green colorblindness).
-
-\subsection{Tables}
-
-All tables must be centered, neat, clean and legible.  The table number and
-title always appear before the table.  See Table~\ref{sample-table}.
-
-Place one line space before the table title, one line space after the
-table title, and one line space after the table. The table title must
-be lower case (except for first word and proper nouns); tables are
-numbered consecutively.
-
-Note that publication-quality tables \emph{do not contain vertical rules.} We
-strongly suggest the use of the \verb+booktabs+ package, which allows for
-typesetting high-quality, professional tables:
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-This package was used to typeset Table~\ref{sample-table}.
-
-\begin{table}
-  \caption{Sample table title}
-  \label{sample-table}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule(r){1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\section{Final instructions}
-
-Do not change any aspects of the formatting parameters in the style files.  In
-particular, do not modify the width or length of the rectangle the text should
-fit into, and do not change font sizes (except perhaps in the
-\textbf{References} section; see below). Please note that pages should be
-numbered.
-
-\section{Preparing PDF files}
-
-Please prepare submission files with paper size ``US Letter,'' and not, for
-example, ``A4.''
-
-Fonts were the main cause of problems in the past years. Your PDF file must only
-contain Type 1 or Embedded TrueType fonts. Here are a few instructions to
-achieve this.
-
-\begin{itemize}
-
-\item For MSWord users: from the print menu, click the PDF drop-down box, and select "Save as PDF…".
-
-\item For \LaTeX{} users: you should directly generate PDF files using \verb+pdflatex+.
-
-\item You can check which fonts a PDF files uses.  In Acrobat Reader, select the
-  menu Files$>$Document Properties$>$Fonts and select Show All Fonts. You can
-  also use the program \verb+pdffonts+ which comes with \verb+xpdf+ and is
-  available out-of-the-box on most Linux machines.
-
-\item The IEEE has recommendations for generating PDF files whose fonts are also
-  acceptable for NeurIPS. Please see
-  \url{http://www.emfield.org/icuwb2010/downloads/IEEE-PDF-SpecV32.pdf}
-
-\item \verb+xfig+ "patterned" shapes are implemented with bitmap fonts.  Use
-  "solid" shapes instead.
-
-\item The \verb+\bbold+ package almost always uses bitmap fonts.  You should use
-  the equivalent AMS Fonts:
-\begin{verbatim}
-   \usepackage{amsfonts}
-\end{verbatim}
-followed by, e.g., \verb+\mathbb{R}+, \verb+\mathbb{N}+, or \verb+\mathbb{C}+
-for $\mathbb{R}$, $\mathbb{N}$ or $\mathbb{C}$.  You can also use the following
-workaround for reals, natural and complex:
-\begin{verbatim}
-   \newcommand{\RR}{I\!\!R} %real numbers
-   \newcommand{\Nat}{I\!\!N} %natural numbers
-   \newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
-Note that \verb+amsfonts+ is automatically loaded by the \verb+amssymb+ package.
-
-\end{itemize}
-
-If your file contains type 3 fonts or non embedded TrueType fonts, we will ask
-you to fix it.
-
-\subsection{Margins in \LaTeX{}}
-
-With \LaTeX{} most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+ from the \verb+graphicx+ package. Always specify the
-figure width as a multiple of the line width as in the example below:
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.pdf}
-\end{verbatim}
-See Section 4.4 in the graphics bundle documentation
-(\url{http://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf})
-
-A number of width problems arise when \LaTeX{} cannot properly hyphenate a
-line. Please give LaTeX hyphenation hints using the \verb+\-+ command when
-necessary.
-
-\begin{ack}
-Use unnumbered first-level headings for the acknowledgments. All acknowledgments
-go at the end of the paper before the list of references. Moreover, you are required to declare 
-funding (financial activities supporting the submitted work) and competing interests (related financial activities outside the submitted work). 
-More information about this disclosure can be found at: \url{https://neurips.cc/Conferences/2020/PaperInformation/FundingDisclosure}.
-
-
-Do {\bf not} include this section in the anonymized submission, only in the final paper. You can use the \texttt{ack} environment provided in the style file to automatically hide this section in the anonymized submission.
-\end{ack}
-
-\section*{References}
-
-References follow the acknowledgments. Use unnumbered first-level heading for
-the references. Any choice of citation style is acceptable as long as you are
-consistent. It is permissible to reduce the font size to \verb+small+ (9 point)
-when listing the references.
-{\bf Note that the Reference section does not count towards the pages of content that are allowed; 4 pages for Papers track and 3 pages for Proposals track.}
-\medskip
-
-\small
-
-[1] Alexander, J.A.\ \& Mozer, M.C.\ (1995) Template-based algorithms for
-connectionist rule extraction. In G.\ Tesauro, D.S.\ Touretzky and T.K.\ Leen
-(eds.), {\it Advances in Neural Information Processing Systems 7},
-pp.\ 609--616. Cambridge, MA: MIT Press.
-
-[2] Bower, J.M.\ \& Beeman, D.\ (1995) {\it The Book of GENESIS: Exploring
-  Realistic Neural Models with the GEneral NEural SImulation System.}  New York:
-TELOS/Springer--Verlag.
-
-[3] Hasselmo, M.E., Schnell, E.\ \& Barkai, E.\ (1995) Dynamics of learning and
-recall at excitatory recurrent synapses and cholinergic modulation in rat
-hippocampal region CA3. {\it Journal of Neuroscience} {\bf 15}(7):5249-5262.
+\section{Introduction}
+    Earth System Models (ESMs) are foundational tools in climate science, combining numerical representations of atmospheric fluid dynamics and other Earth physical processes—such as the ocean, land surface, and cryosphere, on three-dimensional grids [cite]. Despite their importance, ESMs still have significant shortcomings, including imperfect physical parameterizations, insufficient resolution to resolve fine-scale weather phenomena, and prohibitively high computational costs for operational forecasting [cite]. To address these limitations, researchers have increasingly turned to advanced machine learning (ML) techniques. These efforts were pioneered by [cite], building upon foundational studies such as [cites]. Deep Learning Weather Prediction (DLWP) models utilize deep convolutional neural networks (CNNs) for globally gridded weather prediction. The focus of this work is on developing a data-driven ML-based model that can be iteratively stepped forward, similar to traditional numerical weather prediction (NWP) models, to simulate atmospheric states at arbitrarily long lead times [cite]. Specifically, DLWP CNNs directly map atmospheric state $u(t)$ to its future state $u(t + \Delta t)$ by learning from historical weather observations, with $\Delta t$ set to 6 hours.
+
+    Following works have maintained the paradigm of simple numerical solver mimicry while focusing on improving inductive biases for spatial dependencies and better representing grid data on the globe using equiangular gnomonic cubed spheres, spherical harmonic functions, or multi-mesh graph representations. These studies have also worked on improving and adopting more sophisticated ML modules such as Fourier neural operators, graph neural networks, and vision transformers. However, they still adopt autoregressive rollout approaches similar to traditional NWP systems—that is, they can be "rolled out" by feeding their own predictions back as input to generate arbitrarily long trajectories of weather states. In these methods, the next state is calculated solely from the current state, which represents the only mechanism by which time dependency is incorporated into the prediction process. This temporal dependency modeling appears insufficient, representing a critical gap since atmospheric dynamics are fundamentally time-dependent. The lack of components designed to capture trends, seasonality, and cyclical patterns significantly limits forecasting capability.
+    
+    In autoregressive approaches, even within the spatial domain, inductive biases are only considered along the horizontal dimension. In the vertical direction, all data are simply stacked along the channel dimension and fed into the model as input. In other words, the models receive an array of input values (prognostic/diagnostic variables) per horizontal grid cell and then process these in a latent space, apparently to account for vertical mixing and interactions across variables. However, the history of ML demonstrates that whenever a module is developed that introduces a strong inductive bias to naturally simulate the behavior of its corresponding natural phenomenon, it revolutionizes that area of expertise. This includes how the inherent structure and characteristics of CNNs aligned with visual recognition tasks revolutionized image classification and semantic segmentation in image processing, how attention mechanisms strongly simulate the nonlinear behavior of words in phrases and sentences and revolutionized natural language processing, or how probabilistic latent spaces in generative adversarial networks and diffusion models enabled the production of diverse visual content through learned distributional representations.
+    
+    We propose spatiotemporal ML as a substitute for the autoregressive rollout approach to capture the inherent high spatial and temporal dependencies in the data. The temporal module of these models, regardless of type, generally introduces a strong inductive bias for memorizing both short-term and long-term temporal dependencies. In addition to this, we introduce a module that includes spatial encoders to process two different modalities (emission and forcing) in 2D and 3D and transform them into a uniform dimensional latent space, eventually fusing them via Spatial Feature Transform (SFT). Since the horizontal dimension is preserved in this module, the output includes four dimensions—time, features, latitude, and longitude—and can easily be fed into any type of spatiotemporal model with different approaches for representing the spatial domain. We simply use ConvLSTM with a rectangular latitude-longitude grid representation, as previous studies have invested significantly in this area and it was not our primary concern in this study.
+
+\section{Dataset Description}
+    To train the ML model, the NASA GISS-E3 (ModelE) was run with prescribed sea surface temperature (SST) and sea ice fraction for three different time periods. First, pre industrial era between 1850 to 1853, excluding the first year as spin-up period entire 3 years (E3OMA1850M). For this period monthly-averaged BCB concentrations were interpolated on daily interval. this is becasue there is no daily inventory for those period of time. the second dataset falls between 2010 to 2012, 3 years, (E3OMA2010D). as this period falls into sattelite era we used daily BCB concentration for this run. the third dataset is 2020 and 2021 (E3OMA2020D), as 2010 dataset this run is based on daily BCB concentreation.  which is considered for testing the models on entirely different time periods outside the training domain.
+    
+    The atmospheric component of ModelE3 is set for this study to a horizontal resolution of 2$^\circ$ latitude by 2.5$^\circ$ longitude, with 62 vertical layers. The model's temporal resolution is set to half-hour intervals. Model outputs comprise of prognostic/diagnostics required to consider all sub-processes in BCB transport model including horizontal advection, vertical convection, and sink/source terms. The list of candidate variables, their description, units and dimensions on spatial domain are showed in table 1.
+    
+    \begin{table}[htbp]
+        \begin{tabular}{llll}
+            \hline
+            Variable Name       & Description                       & Unit                               & Dim \\ \hline
+            axyp                & Gridcell area                     & $\text{m}^2$                       & 2D  \\
+            landfr              & Land fraction                     & \%                                 & 2D  \\
+            prsurf              & Surface pressure                  & hPa (mb)                           & 2D  \\
+            pblht$_{\text{bp}}$ & Planetary boundary layer          & m                                  & 2D  \\
+            shflx               & Sensible heat flux                & $\text{W}/\text{m}^2$              & 2D  \\
+            lhflx               & Latent heat flux                  & $\text{W}/\text{m}^3$              & 2D  \\
+            BCB$_{\text{src}}$  & BCB source                        & $10^{-12}$ kg m$^{-2}$ s$^{-1}$    & 2D  \\
+            u                   & East-west velocity                & m/s                                & 3D  \\
+            v                   & North-south velocity              & m/s                                & 3D  \\
+            omega               & Pressure vertical velocity        & hPa/s                              & 3D  \\
+            p$_{\text{3D}}$     & Pressure on model levels          & mb                                 & 3D  \\
+            z                   & Layer altitude (above MSL)        & m                                  & 3D  \\
+            t                   & Temperature                       & K                                  & 3D  \\
+            th                  & Potential temperature             & K                                  & 3D  \\
+            q                   & Specific humidity                 & kg/kg                              & 3D  \\
+            prec$_{\text{3D}}$  & Precipitation                     & mm/d                               & 3D  \\
+            cfrad               & Cloud fraction                    & \%                                 & 3D  \\
+            mcuflx              & Convective updraft mass flux      & kg m$^{-2}$ s$^{-1}$               & 3D  \\
+            airmass             & Air mass density                  & kg m$^{-2}$                        & 3D  \\
+            BCB                 & BCB mixing ratio                  & $10^{-11}$ kg/kg$_{\text{air}}$    & 3D  \\ \hline
+        \end{tabular}
+    \end{table}
+    
+    accoridng to equaiton 1 and depending on how to parametrtize the convetion term, the list of required variables would be varried. out of the mentioned variables few of those were excluded based on some preliminary analysis such as Estimate mutual information for a continuous target variable, Univariate linear regression tests, recursive feature elimination and feature importance of Random forest. this preliminary analysis was nececarry as we learn in the training procedures, loading all of the mentioned data in 2D and 3D format will make a great bottleneck in the process of traininig. eventually we conclude with 2 static variabels represeting the era of geach gridcell and the fraction of land, sea and ice, and 4 2D variables which are exting on the sufrace pressure including  Planetary boundary layer, Sensible heat flux, Latent heat flux and BCB biomass source. 3D variables include velocity field in all three direction, pressure tempretaure, potential temperature and precipitaiton.
+    
+    \begin{equation}
+        \frac{du}{dt} + u\frac{du}{dx} + v\frac{du}{dy} + w(\omega,T,q,z)\frac{du}{dz} = \Sigma
+    \end{equation}
+
+    The scope of this project falls into troposphere Based on the the range of pressures for troposphere between 1000 to 200 mbar, the number of total levels should be considered in this study to cover the whole troposphere is between 30 to 40. However, considering the BCB concentration distribution on the vertical levels, the BCB concentration drop significantly after level 20th. this makes data preprocessing and training very laborious. given the fact that ML architecture with high inductive biases on spatial domain generally focus on the regions with high concentration to avoid penalization through loss function (Mean Square Error in this case). eventually the first 20 vertical levels (up to 600 hPa) were considered to be processed. This vertical range covers nearly the entire BCB concentration distribution in the troposphere.
+
+\section{Model Architecture}
+    The model receives 2D and 3D data separately. We used spatial encoders to process two different modalities (emission and forcing). Suppose a batch of 3D input tensors $\mathbf{B} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{B}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D tensors with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features (probability maps). In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
+
+\section{Experimental Settings}
+    The training consists of two tiers. First, the model is trained on data from 1851--1852, comprising 35,040 timesteps, for 50 epochs. The training uses the Adam optimizer with an initial learning rate of 0.0005 and a Cosine Annealing scheduler. To avoid unstable training, the first 10 steps are considered as a warm-up period with a factor of 0.1 and Linear scheduler. In the second tier, the model is then fine-tuned on data from 2010--2011 for 30 epochs using the Adam optimizer with an initial learning rate of $1/5$ of the first tier (i.e., 0.0001) and a Cosine Annealing scheduler. For each round of training, ten percent of the training period is randomly selected as the validation set. However, the entire years of 1853, 2012, 2020, and 2021 are reserved for testing. Therefore, the model is trained on 4 years of data and tested on 4 years, where 2 test years (2020 and 2021) represent entirely different time periods outside the training domain. This configuration provides a crucial capability for climate modeling applications requiring reliable long-term projections, as it evaluates the model's ability to generalize to future climate conditions not seen during training.
+
+\section{Results}
+    
+
+
+
+    
+
+
+
+\bibliographystyle{unsrt}
+\bibliography{ref.bib}
 
 \end{document}
