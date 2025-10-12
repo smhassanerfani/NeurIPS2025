@@ -5,14 +5,14 @@
 % before loading tackling_climate_workshop_style
 
 % ready for submission
-\usepackage{tackling_climate_workshop_style}
+% \usepackage{tackling_climate_workshop_style}
 
 % to compile a preprint version, e.g., for submission to arXiv, add add the
 % [preprint] option:
     % \usepackage[preprint]{tackling_climate_workshop_style}
 
 % to compile a camera-ready version, add the [final] option, e.g.:
-%     \usepackage[final]{tackling_climate_workshop_style}
+    \usepackage[final]{tackling_climate_workshop_style}
 
 % to avoid loading the natbib package, add option nonatbib:
      % \usepackage[nonatbib]{tackling_climate_workshop_style}
@@ -26,9 +26,11 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 
- \usepackage{graphicx}
+\usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{tabularx}
+% \usepackage{draftwatermark}
+
 
 \title{Interactive Atmospheric Composition Emulation for Next-Generation Earth System Models}
 
@@ -81,19 +83,18 @@
 \maketitle
 
 \begin{abstract}
-    Interactive composition simulations in Earth System Models (ESMs) are computationally expensive as they transport numerous gaseous and aerosol tracers at each timestep. This limits higher-resolution transient climate simulations with current computational resources. ESMs like NASA GISS-ModelE3 (ModelE) often use pre-computed monthly-averaged atmospheric composition concentrations (Non-Interactive Tracers or NINT) to reduce computational costs. While NINT significantly cuts computations, it fails to capture real-time feedback between aerosols and other climate processes by relying on pre-calculated fields. We extended the ModelE NINT version using machine learning (ML) to create Smart NINT, which emulates interactive emissions. Smart NINT interactively calculates concentrations using ML with surface emissions and meteorological data as inputs, avoiding full physics parameterizations. Our approach utilizes a spatiotemporal architecture that possesses a well-matched inductive bias to effectively capture the spatial and temporal dependencies in tracer evolution. Input data processed through the first 20 vertical levels (up to 656 hPa) using the ModelE OMA scheme. This vertical range covers nearly the entire BCB concentration distribution in the troposphere. Our evaluation shows excellent model performance with R² values of 0.92 and Pearson r of 0.96 at the first pressure level. This high performance continues through level 15 (808.5 hPa), then gradually decreases as BCB concentrations drop significantly. The model maintains acceptable performance even when tested on data from entirely different periods outside the training domain, which is a crucial capability for climate modeling applications requiring reliable long-term projections. These results confirm that our approach successfully shifts the paradigm from simple numerical solver mimicry to spatio-temporal modeling, offering significant improvements in forecasting capability for long-term climate simulations.
+    Interactive composition simulations in Earth System Models (ESMs) are computationally expensive as they transport numerous gaseous and aerosol tracers at each timestep. This limits higher-resolution transient climate simulations with current computational resources. ESMs like NASA GISS-ModelE3 (ModelE) often use pre-computed monthly-averaged atmospheric composition concentrations (Non-Interactive Tracers or NINT) to reduce computational costs. While NINT significantly cuts computations, it fails to capture real-time feedback between aerosols and other climate processes by relying on pre-calculated fields. We extended the ModelE NINT version using machine learning (ML) to create Smart NINT, which emulates interactive emissions. Smart NINT interactively calculates concentrations using ML with surface emissions and meteorological data as inputs, avoiding full physics parameterizations. Our approach utilizes a spatiotemporal architecture that possesses a well-matched inductive bias to effectively capture the spatial and temporal dependencies in tracer evolution. Input data processed through the first 20 vertical levels (from the surface up to 656 hPa) using the ModelE OMA scheme. This vertical range covers nearly the entire BCB concentration distribution in the troposphere where significant variation on short time horizons due to surface level emissions is observed. Our evaluation shows excellent model performance with R² values of 0.92 and Pearson r of 0.96 at the first pressure level. This high performance continues through level 15 (808.5 hPa), then gradually decreases as BCB concentrations drop significantly. The model maintains acceptable performance even when tested on data from entirely different periods outside the training domain, which is a crucial capability for climate modeling applications requiring reliable long-term projections. These results confirm that our approach successfully shifts the paradigm from simple numerical solver mimicry to spatio-temporal modeling, offering significant improvements in forecasting capability for long-term climate simulations.
 \end{abstract}
 
 \section{Introduction}
     Earth System Models (ESM) are foundational tools in climate science, combining numerical representations of atmospheric fluid dynamics and other Earth physical processes, such as the ocean, land surface, and cryosphere, on three-dimensional grids~\cite{erfani2024spatiotemporal}. Despite their importance, ESMs still have significant shortcomings, including imperfect physical parameterizations, insufficient resolution to resolve fine-scale weather phenomena, and prohibitively high computational costs for operational forecasting. To address these limitations, researchers have increasingly turned to advanced machine learning (ML) techniques. These efforts were pioneered by~\cite{weyn2019can,weyn2020improving,weyn2021sub}, building upon foundational studies such as~\cite{dueben2018challenges,scher2018toward,scher2018predicting,scher2019weather}. Deep Learning Weather Prediction (DLWP) models utilize deep convolutional neural networks (CNNs) for globally gridded weather prediction. The focus is on developing a data-driven ML-based model that can be iteratively stepped forward, similar to traditional numerical weather prediction (NWP) models, to simulate atmospheric states at arbitrarily long lead times. 
     % Specifically, DLWP CNNs directly map atmospheric state $u(t)$ to its future state $u(t + \Delta t)$ by learning from historical weather observations, with $\Delta t$ set to 6 hours~\cite{weyn2019can,weyn2020improving,weyn2021sub}.
 
-    Recent studies has continued to follow traditional numerical solver approaches while working to better represent global grid data. These efforts have explored various representations including equiangular gnomonic cubed spheres~\cite{weyn2020improving}, spherical harmonic functions~\cite{pmlr-v202-bonev23a}, and multi-mesh graph structures~\cite{lam2023learning}. Additionally, these studies have enhanced model performance in the spatial domain by incorporating advanced machine learning components like Fourier neural operators~\cite{li2020fourier, pathak2022fourcastnet}, graph neural networks (GNNs)~\cite{keisler2022forecasting}, and vision transformers~\cite{benson2025atmospheric}. The primary aim of these approaches is to better capture spatial relationships within 3D grids by using ML modules that provide stronger inductive biases for understanding connections between grid points. However, these methods still rely on ``autoregressive rollout'' approaches similar to traditional weather prediction systems. This means they generate long-term weather forecasts by repeatedly feeding their own predictions back as input to create extended sequences of weather states. Almost all studies use this mechanism to handle time-dependent aspects of weather prediction. Unfortunately, this approach is clearly inadequate and represents a major limitation for stable long-term forecasting. This is particularly problematic for atmospheric dynamics, which are fundamentally time-dependent processes. The absence of architectural components specifically designed to capture trends, seasonal patterns, and cyclical behaviors significantly restricts the model ability to make accurate forecasts over extended time periods.
+    Recent studies has continued to follow traditional numerical solver approaches while working to better represent global grid data. These efforts have explored various representations including equiangular gnomonic cubed spheres~\cite{weyn2020improving}, spherical harmonic functions~\cite{pmlr-v202-bonev23a}, and multi-mesh graph structures~\cite{lam2023learning}. Additionally, these studies have enhanced model performance in the spatial domain by incorporating advanced machine learning components that incorporate physical intuition like Fourier neural operators~\cite{li2020fourier, pathak2022fourcastnet}, graph neural networks (GNNs)~\cite{keisler2022forecasting}, and vision transformers~\cite{benson2025atmospheric}. The primary aim of these approaches is to better capture spatial relationships within 3D grids by using ML modules that provide stronger inductive biases for understanding connections between grid points. However, these methods still rely on ``autoregressive rollout'' approaches similar to traditional weather prediction systems. This means they generate long-term weather forecasts by repeatedly feeding their own predictions back as input to create extended sequences of weather states. Almost all studies use this mechanism to handle time-dependent aspects of weather prediction. Unfortunately, this approach is clearly inadequate and represents a major limitation for stable long-term forecasting. This is particularly problematic for atmospheric dynamics, which are fundamentally time-dependent processes. The absence of architectural components specifically designed to capture trends, seasonal patterns, and cyclical behaviors significantly restricts the model's ability to make accurate forecasts over extended time periods.
      
     % In terms of spatial domain, except for GraphCast~\cite{lam2023learning}, which introduces a systematic approach for communicating information between different vertical layers through the message-passing mechanism of GNNs, other studies limit their inductive bias designs to horizontal interactions, treating vertical structure as generic feature channels. In other words, the models receive an array of input values (prognostic/diagnostic variables) per horizontal grid cell and then process these in a latent space, apparently to account for column physics and vertical mixing. This becomes important as providing appropriate components that can capture the inherent characteristics of the task plays a crucial role in ML model performance. Just as attention mechanisms revolutionized natural language processing by enabling models to dynamically focus on relevant parts of input sequences regardless of distance~\cite{vaswani2017attention}, developing specialized vertical modeling components could unlock similar breakthroughs in atmospheric modeling by properly capturing the complex multi-level interactions and dependencies that govern atmospheric dynamics.
 
-    In the spatial domain, most studies focus their design efforts primarily on horizontal interactions, treating vertical structure as generic feature channels. The models typically receive an array of input values (prognostic/diagnostic variables) per horizontal grid cell, which they process in a latent space, presumably to account for column physics and vertical mixing. GraphCast~\cite{lam2023learning} stands as an exception, introducing a systematic approach for communicating information between different vertical layers through the message-passing mechanism of GNNs.
-    The choice of appropriate ML components (modules) that can capture the inherent characteristics of a specific task is crucial for model performance. Consider how attention mechanisms~\cite{vaswani2017attention} revolutionized natural language processing by enabling models to dynamically focus on relevant parts of input sequences regardless of distance, outperforming previous sequential models like bidirectional LSTMs that processed sentences in a rigid, linear fashion~\cite{peters2018deep}. Similarly, developing specialized vertical modeling components could unlock significant breakthroughs in atmospheric modeling by properly capturing the complex multi-level interactions and dependencies that govern atmospheric dynamics. Just as attention mechanisms provided NLP models with the ability to handle long-range dependencies in text, purpose-built ML components for vertical atmospheric modeling could better represent the unique physical processes occurring across different atmospheric layers.
+    In the spatial domain, most studies focus their design efforts primarily on horizontal interactions, treating vertical structure as generic feature channels. The models typically receive an array of input values (prognostic/diagnostic variables) per horizontal grid cell, which they process in a latent space, presumably to account for column physics and vertical mixing. GraphCast~\cite{lam2023learning} stands as an exception, introducing a systematic approach for communicating information between different vertical layers through the message-passing mechanism of GNNs. The choice of appropriate ML components (modules) that can capture the inherent characteristics of a specific task is crucial for model performance. Consider how attention mechanisms~\cite{vaswani2017attention} revolutionized natural language processing by enabling models to dynamically focus on relevant parts of input sequences regardless of distance, outperforming previous sequential models like bidirectional LSTMs that processed sentences in a rigid, linear fashion~\cite{peters2018deep}. Similarly, developing specialized vertical modeling components could unlock significant breakthroughs in atmospheric modeling by properly accounting for column physics, i.e., capturing the complex multi-level interactions and dependencies that govern atmospheric dynamics. Just as attention mechanisms provided NLP models with the ability to handle long-range dependencies in text, purpose-built ML components for vertical atmospheric modeling could better represent the unique physical processes occurring across different atmospheric layers.
 
     We propose spatiotemporal ML as an alternative approach to autoregressive rollout methods to simultaneously capture the inherent high spatial and temporal dependencies in climate data. The temporal module of spatiotemporal ML models, regardless of type (recurrent operations~\cite{elman1990finding}, long short-term memory~\cite{graves2012long}, temporal CNNs~\cite{bai2018empirical}, or attention~\cite{vaswani2017attention}), generally incorporates an appropriate mechanism for capturing temporal dependencies. To address the gap in explicit architectural components for vertical atmospheric coupling, we introduce a preprocessing module that processes two different modalities (2D emission and associated 3D forcings) and fuses them into an identical dimension~\cite{tan2023temporal, wang2018recovering}. The output can be fed into any spatiotemporal model architecture, where ConvLSTM~\cite{shi2015convolutional} is adopted in this study. This study focuses on carbonaceous aerosols, particularly Black Carbon from biomass burning (BCB), the most significant absorbing aerosol species in terms of its direct radiative forcing impacts.
     
@@ -146,11 +147,11 @@
     i) During training, the target variable is normalized using BCB concentration statistics from the first pressure level. This approach is necessary because BCB concentrations naturally decrease with altitude across atmospheric levels. Using level-specific normalization would artificially inflate concentration values at higher altitudes, creating misleading representations of the atmospheric profile. However, this global normalization strategy introduces a systematic bias favoring lower atmospheric levels, where concentrations are naturally higher. % This bias is further amplified by the MSE loss function that overemphasizes larger values during optimization.
 
     % ii) The BCB concentration differences between the first and last pressure levels span an order of magnitude. At higher atmospheric levels, the substantially smaller absolute concentration values can amplify relative prediction errors, significantly impacting statistical measures like $R^2$. This mathematical phenomenon makes the model appear less accurate at higher levels even when absolute errors remain comparable across different atmospheric layers. To verify this effect, we examined the Pearson correlation coefficient ($r$), which exhibits lower sensitivity to scale differences than $R^2$. For the 2012 test period, we observed that the difference between Pearson $r$ values at the first level (0.94) and the highest level (0.73) is approximately 0.21, a considerably smaller gap than observed in the corresponding $R^2$ measurements. This indicates that the model maintains relatively strong predictive capability throughout the vertical profile, despite the $R^2$ metric disproportionately penalizing predictions at levels with lower absolute concentration values. 
-    ii) The BCB concentration differences between the first and last pressure levels span an order of magnitude. At higher atmospheric levels, smaller absolute concentrations amplify relative prediction errors, significantly impacting $R^2$ values. This makes the model appear less accurate at higher levels even when absolute errors remain comparable. To verify this effect, we examined the Pearson correlation coefficient ($r$), which is less sensitive to scale differences. For the 2012 test period, the difference between Pearson $r$ values at the first level (0.94) and highest level (0.73) is only 0.21, much smaller than the corresponding $R^2$ gap. This indicates the model maintains strong predictive capability throughout the vertical profile, despite $R^2$ disproportionately penalizing predictions at levels with lower absolute concentrations.
+    ii) The BCB concentration differences between the first and last pressure levels span an order of magnitude. At higher atmospheric levels, smaller absolute concentrations amplify relative prediction errors, significantly impacting $R^2$ values. This makes the model appear less accurate at higher levels even when absolute errors remain comparable. To verify this effect, we examined the Pearson correlation coefficient ($r$), which is less sensitive to scale differences. For the 2012 test period, the difference between Pearson $r$ values at the first level (0.94) and the highest level (0.73) is only 0.21, much smaller than the corresponding $R^2$ gap. This indicates the model maintains strong predictive capability throughout the vertical profile, despite $R^2$ disproportionately penalizing predictions at levels with lower absolute concentrations.
     
     This discrepancy becomes more pronounced in Figure~\ref{fig:vertical_profile}, which compares BCB concentration profiles across 20 vertical levels for ML prediction versus ground truth data.
-    The profiles demonstrate the model ability to capture the general vertical distribution pattern of BCB across different time periods. In 1853, model predictions closely match observations throughout the vertical column. In contrast, for more recent years (2012-2021), the model consistently underestimates BCB concentrations, particularly at lower and middle atmospheric levels, while showing improved agreement at higher levels. A wide range of analysis comparing the results in different aspects is presented in Appendix~\ref{sec:appendix-3}.
-        
+    The profiles demonstrate the model ability to capture the general vertical distribution pattern of BCB across different time periods. In 1853, model predictions closely match observations throughout the vertical column. In contrast, for more recent years (2012-2021), the model consistently underestimates BCB concentrations, particularly at lower and middle atmospheric levels, while showing improved agreement at higher levels. 
+    
     \begin{figure}[htbp]
         \centering
         \includegraphics[width=1\linewidth]{conc_profile-p.png}
@@ -158,11 +159,24 @@
         \label{fig:vertical_profile}
     \end{figure}
 
-\section{Conclusion}
-    In this study, we investigated a spatiotemporal machine learning approach as an alternative to autoregressive rollout methods for computing atmospheric composition dynamics, with particular emphasis on biomass-burning black carbon (BCB). Unlike autoregressive rollout approaches that aim to mimic the sequential behavior of numerical solvers, our method directly addresses the underlying physical problem through end-to-end machine learning.
-    Our approach incorporates specialized architectural modules that encode inductive biases aligned with the inherent spatial and temporal dependencies of atmospheric transport and chemistry. By embedding these physical constraints directly into the model architecture, we achieve predictions that remain physically realistic over extended time horizons which is a critical requirement for climate modeling applications where simulations must maintain reliability across multi-decadal to centennial projections.
+    \subsection{Annual Mean BCB Column Burden}
+    To quantify the overall performance of the model across different regions and time periods, we compare the column burden of ground truth (ModelE simulation outputs) with machine learning (ML) predictions (see Figure~\ref{fig:column_burden}). In general, the ML-predicted column densities tend to be biased low compared to ground truth, with this underestimation becoming more pronounced over time. This trend, however, is less evident in tropical regions with high biomass burning activity, such as the Amazon and Central/Southern Africa.
+
+    The model struggles particularly in regions with newly emerging or episodic activity during the test period, such as the US and northeast Russia. Specifically, in 2020 and 2021, the model substantially underestimates values in the US West, a period marked by unprecedented wildfire events that emitted record-breaking amounts of black carbon aerosols and particulates. For instance, the 2020 US wildfire season saw five of the six largest fires on record in California, as well as massive fires in Oregon and Washington, with total burned areas exceeding 8 million acres and resulting in significant spikes in atmospheric black carbon. Similarly, 2021 recorded exceptionally high levels of wildfire carbon emissions, particularly from boreal and Western US fires, driving steep increases in atmospheric soot content~\cite{sannigrahi2022examining}. For northeast Russia, the historical context remains important. According to the statistics of the Global Wildfire Information System (GWIS), the summer of 2012 was the most severe wildfire season in a decade, with extensive burning across the Siberian taiga fueled by abnormal heat and drought conditions, causing dramatic increases in regional black carbon levels. % newly emerging or episodic activity: especially when emissions deviate sharply from climatological norms. 
+    % A wide range of analyses comparing the results in different aspects is presented in Appendix~\ref{sec:appendix-3}.
+        
     
-    % Our findings confirm our central hypothesis that ``architectural provisions'' for temporal evolution and vertical atmospheric coupling produce corresponding improvements in model accuracy and physical consistency.
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=1\linewidth]{column_burden.png}
+        \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
+        \label{fig:column_burden}
+    \end{figure}
+
+\section{Conclusion}
+    In this study, we investigated a spatiotemporal machine learning approach as an alternative to autoregressive rollout methods for computing atmospheric composition dynamics, with particular emphasis on biomass-burning black carbon (BCB). Unlike autoregressive rollout approaches, which lack the necessary architectural components to capture long-term time-dependent behavior, our method directly addresses the underlying physical problem through end-to-end machine learning. Our approach incorporates specialized architectural modules that encode inductive biases aligned with the inherent `spatial' and `temporal' dependencies of atmospheric transport and chemistry. By embedding these physical constraints directly into the model architecture, we achieve predictions that remain physically realistic over extended time horizons, which is a critical requirement for climate modeling applications where simulations must maintain reliability across multi-decadal to centennial projections.
+    
+    Our findings confirm our central hypothesis that "architectural provisions" for temporal evolution and vertical atmospheric coupling produce corresponding improvements in model accuracy and physical consistency. These gains demonstrate that architectural design for time and height is crucial, complementing the necessary efforts to respect the Earth's spherical geometry through appropriate projections, multi-mesh graph structures, or the use of spherical harmonic transforms.
 
 \bibliographystyle{unsrt}
 \bibliography{ref.bib}
@@ -201,7 +215,7 @@
         \end{tabular}
     \end{table}
     
-    According to Equation~\ref{eq:transport_model} and depending on how the convection term is parameterized, the list of required variables may vary. Several of the aforementioned variables were excluded based on preliminary analysis, including estimation of mutual information for continuous target variables, univariate linear regression tests, recursive feature elimination, and feature importance analysis using Random Forest. This preliminary analysis was necessary because loading all mentioned 2D and 3D variables creates a significant bottleneck in the training process.
+    According to Equation~\ref{eq:transport_model} and depending on how the convection term is parameterized, the list of required variables may vary. Several of the aforementioned variables were excluded based on preliminary analysis, including estimation of mutual information for continuous target variables, univariate linear regression tests, recursive feature elimination, and feature importance analysis using Random Forest. This preliminary analysis was necessary because loading all the mentioned 2D and 3D variables creates a significant bottleneck in the training process.
     
     Eventually, we selected 2 static variables representing the area of each gridcell and the fraction of land, sea, and ice; four 2D variables existing at the surface including planetary boundary layer height, sensible heat flux, latent heat flux, and BCB biomass source; and eight 3D variables including the velocity field in all three directions, pressure, temperature, potential temperature, relative humidity and precipitation.
     
@@ -210,10 +224,27 @@
         \label{eq:transport_model}
     \end{equation}
     
-    The scope of this project focuses on the troposphere. Based on the pressure range for the troposphere (1000 to 200 mbar), the total number of levels required to cover the entire troposphere is between 30 and 40. However, considering the BCB concentration distribution across vertical levels, BCB concentrations drop significantly after the 20th level, making data preprocessing and training computationally intensive. Given that ML architectures with high inductive biases in the spatial domain generally focus on regions with high concentrations to avoid penalization through the loss function (Mean Square Error in this case), the first 20 vertical levels (up to 600 hPa) were selected for processing. This vertical range covers nearly the entire BCB concentration distribution in the troposphere.
+    The scope of this project focuses on the troposphere. Based on the pressure range for the troposphere (1000 to 200 mbar), the total number of levels required to cover the entire troposphere is between 30 and 40. However, considering the BCB concentration distribution across vertical levels, BCB concentrations drop significantly after the 20th level, making data preprocessing and training computationally intensive. Given that ML architectures with high inductive biases in the spatial domain generally focus on regions with high concentrations to avoid penalization through the loss function (Mean Squared Error in this case), the first 20 vertical levels (up to 600 hPa) were selected for processing. This vertical range covers nearly the entire BCB concentration distribution in the troposphere, where significant variation due to surface-level emissions is observed.
+
+    Figure~\ref{fig:conc_vprofile_test} shows the BCB concentration profile across all 62 vertical levels of ModelE3 for the 4-year test period. As evident from the figure, BCB concentration begins to deplete after 808 hPa (level 15). This study estimates BCB concentration up to 656 hPa (level 20, shown in orange). BCB activities persist until 171 hPa (level 35, marked in magenta). This region falls almost entirely within the troposphere. Figure~\ref{fig:conc_sdist_2012} shows the spatial distribution of annual average BCB concentration over the test period, using 2012 as a representative example for all four years in the test set. The figure demonstrates that BCB concentration decreases by three orders of magnitude between 656 and 171 hPa (levels 20 to 35), which makes data preprocessing and training very laborious as the number of input layers and the consequent target variable output layers increase. Figure~\ref{fig:conc_sdist_2012} also shows that the global pattern of BCB concentration changes drastically after level 20.
+    
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\linewidth]{conc_vprofile_test.png}
+        \caption{Vertical profiles of BCB concentration across the entire 62 atmospheric levels for four different years of the test set.}
+        \label{fig:conc_vprofile_test}
+    \end{figure}
+
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\linewidth]{conc_sdist_2012.png}
+        \caption{Spatial distribution of annual average BCB concentration during 2012 across eight different pressure levels from 979 hPa (Level 1) to 171 hPa (Level 35). Note the different color scales for each level, with concentrations decreasing by multiple orders of magnitude at higher altitudes.}
+        \label{fig:conc_sdist_2012}
+    \end{figure}
+
 
 \section{Model Architecture} \label{sec:appendix-2}
-    The model receives 2D and 3D data separately. According to Figure~\ref{fig:model_architecture}, We used spatial encoders to process two different modalities (emission and forcing). Suppose a batch of 3D input tensors $\mathbf{\beta} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{\beta}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each 3D variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D variables with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the identical number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features. In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
+    The model receives 2D and 3D data separately. According to Figure~\ref{fig:model_architecture}, we used spatial encoders to process two different modalities (2D and 3D variables). Suppose a batch of 3D input tensors $\mathbf{\beta} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{\beta}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each 3D variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D variables with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the identical number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features. In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
 
     \begin{figure}[htbp]
         \centering
@@ -225,54 +256,47 @@
     \subsection{Experimental Settings}
         The training consists of two tiers. First, the model is trained on data from 1851--1852, comprising 35,040 timesteps, for 50 epochs. The training uses the Adam optimizer with default beta values of 0.9 and 0.999. The loss function combined Mean Squared Error (MSE) and Mean Absolute Error (MAE) with equal weights to balance sensitivity to outliers and overall error magnitude. The initial learning rate of 0.0005 and a Cosine Annealing scheduler is considered for training. To avoid unstable training, the first 10 steps are considered as a warm-up period with a factor of 0.1 and Linear scheduler. In the second tier, the model is then fine-tuned on data from 2010--2011 for 30 epochs using the Adam optimizer with an initial learning rate of $1/5$ of the first tier (i.e., 0.0001) and a Cosine Annealing scheduler. For each round of training, ten percent of the training period is randomly selected as the validation set. However, the entire years of 1853, 2012, 2020, and 2021 are reserved for testing. Therefore, the model is trained on 4 years of data and tested on 4 years, where 2 test years (2020 and 2021) represent entirely different time periods outside the training domain. This configuration provides a crucial capability for climate modeling applications requiring reliable long-term projections, as it evaluates the model's ability to generalize to future climate conditions not seen during training.
 
+    Figure~\ref{fig:train_test_years} shows the global average of daily BCB emission sources for training and test years. The training years (1851-1852, 2010-2011) are marked by orange shading while the test years (1853, 2012, and 2020-2021) are highlighted by purple shading. As shown, the concentration of BCB emission sources is considerably higher during industrial periods compared to pre-industrial periods (1851 to 1853). In pre-industrial periods (blue line), the values oscillate smoothly as these daily values are calculated by interpolation of monthly averages. The industrial periods show much higher variability, with the 2020-2021 period (green line) exhibiting the most extreme peaks. Notably, the 2021 peaks reach approximately two times higher than the highest values observed in the earlier industrial period (2010-2012, red line).
+
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\linewidth]{train_test_years.png}
+        \caption{Global average daily BCB emission sources for pre-industrial (blue line, 1851-1853) and industrial periods (red line for 2010-2012, green line for 2020-2021). Training years are highlighted with orange shading and test years with purple shading.}
+        \label{fig:train_test_years}
+    \end{figure}
+
+
 \section{Results} \label{sec:appendix-3}
     Throughout this paper, we refer to atmospheric levels using both pressure values (in hPa) and level nomenclature interchangeably. Table~\ref{tab:pressure_levels} provides the complete mapping between the 20 atmospheric levels and their corresponding pressure values used in our analysis. Readers can reference this table to identify the specific atmospheric level when pressure values are mentioned in the text, figures, or discussions of model performance across different vertical layers of the atmosphere.
 
     \begin{table}[htbp]
         \centering
-        \caption{Atmospheric pressure levels and their corresponding pressure values used in this study.}
+        \caption{Atmospheric pressure levels and their corresponding pressure values (hPa) used in this study.}
         \label{tab:pressure_levels}
-        \begin{tabular}{ll}
+        \begin{tabular}{llllllll}
         \hline
-        Level & Pressure (hPa) \\
+        Level & Press & Level & Press & Level & Press & Level & Press \\
         \hline
-        level-01  & 979.0 \\
-        level-02  & 969.0 \\
-        level-03  & 959.0 \\
-        level-04  & 949.0 \\
-        level-05  & 939.0 \\
-        level-06  & 929.0 \\
-        level-07  & 919.0 \\
-        level-08  & 909.0 \\
-        level-09  & 899.0 \\
-        level-10 & 888.5 \\
-        level-11 & 877.0 \\
-        level-12 & 864.0 \\
-        level-13 & 848.5 \\
-        level-14 & 830.0 \\
-        level-15 & 808.5 \\
-        level-16 & 784.0 \\
-        level-17 & 756.5 \\
-        level-18 & 726.0 \\
-        level-19 & 692.5 \\
-        level-20 & 656.0 \\
+        level-01 & 979.0 & level-06 & 929.0 & level-11 & 877.0 & level-16 & 784.0 \\
+        level-02 & 969.0 & level-07 & 919.0 & level-12 & 864.0 & level-17 & 756.5 \\
+        level-03 & 959.0 & level-08 & 909.0 & level-13 & 848.5 & level-18 & 726.0 \\
+        level-04 & 949.0 & level-09 & 899.0 & level-14 & 830.0 & level-19 & 692.5 \\
+        level-05 & 939.0 & level-10 & 888.5 & level-15 & 808.5 & level-20 & 656.0 \\
         \hline
         \end{tabular}
     \end{table}
     
+    % \subsection{Annual Mean BCB Column Burden}
+    % To quantify the overall performance of the model across different regions and time periods, we compare the column burden of ground truth (ModelE simulation outputs) with machine learning (ML) predictions (see Figure~\ref{fig:column_burden}). In general, the ML-predicted column densities tend to be biased low compared to ground truth, with this underestimation becoming more pronounced over time. This trend, however, is less evident in tropical regions with high biomass burning activity, such as the Amazon and Central/Southern Africa.
 
-
-    \subsection{Annual Mean BCB Column Burden}
-    To quantify the overall performance of the model across different regions and time periods, we compare the column burden of ground truth (ModelE simulation outputs) with machine learning (ML) predictions (see Figure~\ref{fig:column_burden}). In general, the ML-predicted column densities tend to be biased low compared to ground truth, with this underestimation becoming more pronounced over time. This trend, however, is less evident in tropical regions with high biomass burning activity, such as the Amazon and Central/Southern Africa.
-
-    The model struggles particularly in regions with newly emerging or episodic activity during the test period, such as the US and northeast Russia. Specifically, in 2020 and 2021, the model substantially underestimates values in the US West, a period marked by unprecedented wildfire events that emitted record-breaking amounts of black carbon aerosols and particulates. For instance, the 2020 US wildfire season saw five of the six largest fires on record in California, and massive fires in Oregon and Washington, with total burned areas exceeding 8 million acres and resulting in significant spikes in atmospheric black carbon. Similarly, 2021 recorded exceptionally high levels of wildfire carbon emissions, particularly from boreal and Western US fires, driving steep increases in atmospheric soot content~\cite{sannigrahi2022examining}. For northeast Russia, the historical context remains important. According to the statistics of Global Wildfire Information System (GWIS), the summer of 2012 was the most severe wildfire season in a decade, with extensive burning across the Siberian taiga fueled by abnormal heat and drought conditions, causing dramatic increases in regional black carbon levels. % newly emerging or episodic activity: especially when emissions deviate sharply from climatological norms. 
+    % The model struggles particularly in regions with newly emerging or episodic activity during the test period, such as the US and northeast Russia. Specifically, in 2020 and 2021, the model substantially underestimates values in the US West, a period marked by unprecedented wildfire events that emitted record-breaking amounts of black carbon aerosols and particulates. For instance, the 2020 US wildfire season saw five of the six largest fires on record in California, and massive fires in Oregon and Washington, with total burned areas exceeding 8 million acres and resulting in significant spikes in atmospheric black carbon. Similarly, 2021 recorded exceptionally high levels of wildfire carbon emissions, particularly from boreal and Western US fires, driving steep increases in atmospheric soot content~\cite{sannigrahi2022examining}. For northeast Russia, the historical context remains important. According to the statistics of Global Wildfire Information System (GWIS), the summer of 2012 was the most severe wildfire season in a decade, with extensive burning across the Siberian taiga fueled by abnormal heat and drought conditions, causing dramatic increases in regional black carbon levels. % newly emerging or episodic activity: especially when emissions deviate sharply from climatological norms. 
     
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=1\linewidth]{column_burden.png}
-        \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
-        \label{fig:column_burden}
-    \end{figure}
+    % \begin{figure}[htbp]
+    %     \centering
+    %     \includegraphics[width=1\linewidth]{column_burden.png}
+    %     \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
+    %     \label{fig:column_burden}
+    % \end{figure}
 
     \subsection{Global Distribution of Coefficient of Determination}
     Figure~\ref{fig:rsquare} shows spatial variations of R$^2$ from surface pressure level (Level 01) up to Level 20, with darker green areas indicating higher R$^2$ values and white areas representing zero or negative R$^2$ values where the climatological average could perform better than the ML model in those regions. Investigation on the low performance regions shows that the BCB concentrations in these regions (with negative R$^2$ values) are smaller than those in high-concentration regions by several orders of magnitude; thus, the models generally produce random noise in these areas. 
@@ -324,9 +348,33 @@
         \label{fig:global_average_2021}
     \end{figure}
 
+
+\section{Ablation Study}
+    We conducted comprehensive ablation studies to evaluate the contributions of individual components in our proposed network architecture. Specifically, we examined the effects of incorporating spatial feature encoders (Encoder), spatial feature transformation for modality fusion (SFT), or removing one or both of these modules. To optimize training resources, each model variant was trained on the entire year of 1852 and evaluated on 2012 data. Table~\ref{tab:ablation_study} presents the performance metrics for different model variants predicting the column burden of BCB, calculated by summing the concentration across all 20 pressure levels for each grid cell. Our results demonstrate that the benchmark model with all components achieves superior performance compared to reduced variants. Removing the SFT module caused a modest decrease in performance, while removing the Encoder module resulted in more significant degradation. Interestingly, the model without both modules slightly outperformed the variant missing only the Encoder, suggesting complex interactions between these architectural components. These findings highlight the critical role of both spatial feature extraction and modality fusion in achieving optimal predictive performance.
+
+    \begin{table}[htbp]
+        \centering
+        \caption{Ablation study of each proposed component on performance metrics.}
+        \label{tab:ablation_study}
+        \begin{tabular}{lcccc}
+        \hline
+        \textbf{Encoder} & \textbf{SFT} & \textbf{R$^2$ $\uparrow$} & \textbf{MAE $\downarrow$} & \textbf{RMSE $\downarrow$} \\
+        \hline
+         &  & 0.9439 & 0.0119 & 0.0235 \\
+        \checkmark &  & 0.9424 & 0.0123 & 0.0242 \\
+         & \checkmark & 0.9492 & 0.0117 & 0.0227 \\
+        \checkmark & \checkmark & \textbf{0.9585} & \textbf{0.0104} & \textbf{0.0199} \\
+        \hline
+        \end{tabular}
+    \end{table}
+
+    Figure~\ref{fig:ablation_study} compares the vertical profiles of BCB concentration across 20 atmospheric pressure levels for different model variants. The results demonstrate that the full model most accurately follows the ground truth vertical distribution, with notably lower bias compared to variants lacking spatial feature encoders, spatial feature transformation modules, or both. This visual comparison complements the quantitative metrics in Table~\ref{tab:ablation_study}, illustrating that the full model's superior performance extends beyond integrated column burden to accurately representing concentrations at individual pressure levels throughout the atmospheric profile.
+    
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.5\linewidth]{ablation_study.png}
+        \caption{Impact of model components on vertical profiles of BCB concentration across 20 atmospheric levels.}
+        \label{fig:ablation_study}
+    \end{figure}
+
 \end{document}
-
-
-    Following works have maintained the paradigm of traditional numerical solver mimicry while focusing on better representing grid data on the globe format using equiangular gnomonic cubed spheres~\cite{weyn2020improving}, spherical harmonic functions~\cite{pmlr-v202-bonev23a}, or multi-mesh graph~\cite{lam2023learning} representations. Moreover, These studies have worked on improving model performance on the spatial domain by adopting more sophisticated ML components such as Fourier neural operators~\cite{li2020fourier, pathak2022fourcastnet}, graph neural networks (GNNs)~\cite{keisler2022forecasting}, and vision transformers~\cite{benson2025atmospheric}. Thus, the main goal of these approaches is to better capture spatial dependencies within 3D grids by incorporating ML modules that introduce stronger inductive biases for between grids relationships. However, they still adopt ``autoregressive rollout'' approaches similar to traditional NWP systems, that is, they can be "rolled out" by feeding their own predictions back as input to generate arbitrarily long trajectories of weather states~\cite{weyn2019can}. And almost all of the studies content with this mechanism to incorporate time dependency into the prediction process. However, this is obviously insufficient, representing a critical gap for stable predction for long run. especially for atmospheric dynamics which is fundamentally time-dependent. Consequently, the lack of architectral components designed to capture trends, seasonality, and cyclical patterns significantly limits forecasting capability over time.
-
-    Recent research has continued to follow traditional numerical solver approaches while working to better represent global grid data. These efforts have explored various representations including equiangular gnomonic cubed spheres~\cite{weyn2020improving}, spherical harmonic functions~\cite{pmlr-v202-bonev23a}, and multi-mesh graph structures~\cite{lam2023learning}. Additionally, these studies have enhanced model performance in the spatial domain by incorporating advanced machine learning components like Fourier neural operators~\cite{li2020fourier, pathak2022fourcastnet}, graph neural networks (GNNs)~\cite{keisler2022forecasting}, and vision transformers~\cite{benson2025atmospheric}. The primary aim of these approaches is to better capture spatial relationships within 3D grids by using ML modules that provide stronger inductive biases for understanding connections between grid points. However, these methods still rely on ``autoregressive rollout'' approaches similar to traditional weather prediction systems. This means they generate long-term weather forecasts by repeatedly feeding their own predictions back as input to create extended sequences of weather states. Almost all studies use this mechanism to handle time-dependent aspects of weather prediction. Unfortunately, this approach is clearly inadequate and represents a major limitation for stable long-term forecasting. This is particularly problematic for atmospheric dynamics, which are fundamentally time-dependent processes. The absence of architectural components specifically designed to capture trends, seasonal patterns, and cyclical behaviors significantly restricts the models' ability to make accurate forecasts over extended time periods.
