@@ -98,6 +98,25 @@
     
 \section{Methodology}
     In this work, we emulate the prediction of BCB (Black Carbon from Biomass Burning) transport for the first 20 vertical levels (up to 600 hPa) of the NASA GISS-E3 ESM model (tropospheric portion). Specifically, we aim to forecast the 3D field of BCB concentration in the atmosphere at timestep $t$, given meteorological inputs (e.g., wind components and precipitation) and BCB surface fluxes from the previous 47 timesteps. The list of candidate variables, their description, units and dimensions on spatial domain are showed in Appendix~\ref{sec:appendix-1}.
+
+    The scope of this project focuses on the troposphere. Based on the pressure range for the troposphere (1000 to 200 mbar), the total number of levels required to cover the entire troposphere is between 30 and 40. However, considering the BCB concentration distribution across vertical levels, BCB concentrations drop significantly after the 20th level, making data preprocessing and training computationally intensive. Given that ML architectures with high inductive biases in the spatial domain generally focus on regions with high concentrations to avoid penalization through the loss function (Mean Squared Error in this case), the first 20 vertical levels (up to 600 hPa) were selected for processing. This vertical range covers nearly the entire BCB concentration distribution in the troposphere, where significant variation due to surface-level emissions is observed.
+
+    Figure~\ref{fig:conc_vprofile_test} shows the BCB concentration profile across all 62 vertical levels of ModelE3 for the 4-year test period. As evident from the figure, BCB concentration begins to deplete after 808 hPa (level 15). This study estimates BCB concentration up to 656 hPa (level 20, shown in orange). BCB activities persist until 171 hPa (level 35, marked in magenta). This region falls almost entirely within the troposphere. Figure~\ref{fig:conc_sdist_2012} shows the spatial distribution of annual average BCB concentration over the test period, using 2012 as a representative example for all four years in the test set. The figure demonstrates that BCB concentration decreases by three orders of magnitude between 656 and 171 hPa (levels 20 to 35), which makes data preprocessing and training very laborious as the number of input layers and the consequent target variable output layers increase. Figure~\ref{fig:conc_sdist_2012} also shows that the global pattern of BCB concentration changes drastically after level 20.
+    
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\linewidth]{figs/conc_vprofile_test.png}
+        \caption{Vertical profiles of BCB concentration across the entire 62 atmospheric levels for four different years of the test set.}
+        \label{fig:conc_vprofile_test}
+    \end{figure}
+
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\linewidth]{figs/conc_sdist_2012.png}
+        \caption{Spatial distribution of annual average BCB concentration during 2012 across eight different pressure levels from 979 hPa (Level 1) to 171 hPa (Level 35). Note the different color scales for each level, with concentrations decreasing by multiple orders of magnitude at higher altitudes.}
+        \label{fig:conc_sdist_2012}
+    \end{figure}
+
     
     \subsection{Dataset Description}
         To train the ML model, the NASA GISS-E3 (ModelE) was run with prescribed sea surface temperature (SST) and sea ice fraction for three different time periods. First, the pre-industrial era from 1851 to 1853 (3 years), yielding 3 years of data (E3OMA1850M). For this period, monthly-averaged BCB concentrations were interpolated to daily intervals, as no daily inventory exists for this time period. The second dataset spans 2010 to 2012 (3 years) (E3OMA2010D). Since this period falls within the satellite era, daily BCB concentrations were used for this run. The third dataset covers 2020 and 2021 (2 years) (E3OMA2020D). Like the 2010 dataset, this run is based on daily BCB concentrations and is considered for testing the model on entirely different time periods outside the training domain.
@@ -181,65 +200,47 @@
 
 \newpage \appendix
 \section{Dataset Description} \label{sec:appendix-1}
-    The atmospheric component of ModelE is configured for this study with a horizontal resolution of 2$^\circ$ latitude by 2.5$^\circ$ longitude and 62 vertical layers. The model's temporal resolution is set to half-hour intervals. Model outputs comprise prognostic and diagnostic variables required to consider all sub-processes in the BCB transport model, including horizontal advection, vertical convection, and sink/source terms. The list of variables is shown in Table~\ref{tab:model_variables}.
+    The atmospheric component of ModelE is configured for this study with a horizontal resolution of 2$^\circ$ latitude by 2.5$^\circ$ longitude and 62 vertical layers. The model's temporal resolution is set to half-hour intervals. Model outputs comprise the variables required to consider all sub-processes in the BCB transport model, including horizontal advection, vertical convection, and sink/source terms. The list of variables is shown in Table~\ref{tab:model_variables}.
 
     \begin{table}[htbp]
         \centering
         \caption{ModelE variables used in BCB transport modeling}
         \label{tab:model_variables}
-        \begin{tabular}{llll}
+        \begin{tabular}{lllll}
             \hline
-            Variable Name       & Description                       & Unit                               & Dim \\ \hline
-            axyp                & Gridcell area                     & $\text{m}^2$                       & 2D  \\
-            landfr              & Land fraction                     & \%                                 & 2D  \\
-            prsurf              & Surface pressure                  & hPa (mb)                           & 2D  \\
-            pblht$_{\text{bp}}$ & Planetary boundary layer height   & m                                  & 2D  \\
-            shflx               & Sensible heat flux                & $\text{W}/\text{m}^2$              & 2D  \\
-            lhflx               & Latent heat flux                  & $\text{W}/\text{m}^2$              & 2D  \\
-            BCB$_{\text{src}}$  & BCB source                        & $10^{-12}$ kg m$^{-2}$ s$^{-1}$    & 2D  \\
-            u                   & East-west velocity                & m/s                                & 3D  \\
-            v                   & North-south velocity              & m/s                                & 3D  \\
-            omega               & Pressure vertical velocity        & hPa/s                              & 3D  \\
-            p$_{\text{3D}}$     & Pressure on model levels          & mb                                 & 3D  \\
-            z                   & Layer altitude (above MSL)        & m                                  & 3D  \\
-            t                   & Temperature                       & K                                  & 3D  \\
-            th                  & Potential temperature             & K                                  & 3D  \\
-            q                   & Specific humidity                 & kg/kg                              & 3D  \\
-            prec$_{\text{3D}}$  & Precipitation                     & mm/d                               & 3D  \\
-            cfrad               & Cloud fraction                    & \%                                 & 3D  \\
-            mcuflx              & Convective updraft mass flux      & kg m$^{-2}$ s$^{-1}$               & 3D  \\
-            airmass             & Air mass density                  & kg m$^{-2}$                        & 3D  \\
-            BCB                 & BCB mixing ratio                  & $10^{-11}$ kg/kg$_{\text{air}}$    & 3D  \\ \hline
+            Variable Name       & Description                       & Unit                               & Dim & Selected \\ \hline
+            axyp                & Gridcell area                     & $\text{m}^2$                       & 2D  & \checkmark \\
+            landfr              & Land fraction                     & \%                                 & 2D  & \checkmark \\
+            prsurf              & Surface pressure                  & hPa (mb)                           & 2D  & $\times$   \\
+            pblht$_{\text{bp}}$ & Planetary boundary layer height   & m                                  & 2D  & \checkmark \\
+            shflx               & Sensible heat flux                & $\text{W}/\text{m}^2$              & 2D  & \checkmark \\
+            lhflx               & Latent heat flux                  & $\text{W}/\text{m}^2$              & 2D  & \checkmark \\
+            BCB$_{\text{src}}$  & BCB source                        & $10^{-12}$ kg m$^{-2}$ s$^{-1}$    & 2D  & \checkmark \\
+            u                   & East-west velocity                & m/s                                & 3D  & \checkmark \\
+            v                   & North-south velocity              & m/s                                & 3D  & \checkmark \\
+            omega               & Pressure vertical velocity        & hPa/s                              & 3D  & \checkmark \\
+            p$_{\text{3D}}$     & Pressure on model levels          & mb                                 & 3D  & \checkmark \\
+            z                   & Layer altitude (above MSL)        & m                                  & 3D  & $\times$   \\
+            t                   & Temperature                       & K                                  & 3D  & \checkmark \\
+            th                  & Potential temperature             & K                                  & 3D  & \checkmark \\
+            q                   & Specific humidity                 & kg/kg                              & 3D  & \checkmark \\
+            prec$_{\text{3D}}$  & Precipitation                     & mm/d                               & 3D  & \checkmark \\
+            cfrad               & Cloud fraction                    & \%                                 & 3D  & $\times$   \\
+            mcuflx              & Convective updraft mass flux      & kg m$^{-2}$ s$^{-1}$               & 3D  & $\times$   \\
+            airmass             & Air mass density                  & kg m$^{-2}$                        & 3D  & $\times$   \\
+            BCB                 & BCB mixing ratio                  & $10^{-11}$ kg/kg$_{\text{air}}$    & 3D  & \checkmark  \\ \hline
         \end{tabular}
     \end{table}
     
-    According to Equation~\ref{eq:transport_model} and depending on how the convection term is parameterized, the list of required variables may vary. Several of the aforementioned variables were excluded based on preliminary analysis, including estimation of mutual information for continuous target variables, univariate linear regression tests, recursive feature elimination, and feature importance analysis using Random Forest. This preliminary analysis was necessary because loading all the mentioned 2D and 3D variables creates a significant bottleneck in the training process.
+    % According to Equation~\ref{eq:transport_model} and depending on how the convection term is parameterized, the list of required variables may vary. 
+        Several of the aforementioned variables were excluded based on preliminary analysis, including estimation of mutual information for continuous target variables, univariate linear regression tests, recursive feature elimination, and feature importance analysis using Random Forest~\cite{scikit-learn}. This preliminary analysis was necessary because loading all the mentioned 2D and 3D variables creates a significant bottleneck in the training process.
     
     Eventually, we selected 2 static variables representing the area of each gridcell and the fraction of land, sea, and ice; four 2D variables existing at the surface including planetary boundary layer height, sensible heat flux, latent heat flux, and BCB biomass source; and eight 3D variables including the velocity field in all three directions, pressure, temperature, potential temperature, relative humidity and precipitation.
     
-    \begin{equation}
-        \frac{du}{dt} + u\frac{du}{dx} + v\frac{du}{dy} + w(\omega,T,q,z)\frac{du}{dz} = \Sigma
-        \label{eq:transport_model}
-    \end{equation}
-    
-    The scope of this project focuses on the troposphere. Based on the pressure range for the troposphere (1000 to 200 mbar), the total number of levels required to cover the entire troposphere is between 30 and 40. However, considering the BCB concentration distribution across vertical levels, BCB concentrations drop significantly after the 20th level, making data preprocessing and training computationally intensive. Given that ML architectures with high inductive biases in the spatial domain generally focus on regions with high concentrations to avoid penalization through the loss function (Mean Squared Error in this case), the first 20 vertical levels (up to 600 hPa) were selected for processing. This vertical range covers nearly the entire BCB concentration distribution in the troposphere, where significant variation due to surface-level emissions is observed.
-
-    Figure~\ref{fig:conc_vprofile_test} shows the BCB concentration profile across all 62 vertical levels of ModelE3 for the 4-year test period. As evident from the figure, BCB concentration begins to deplete after 808 hPa (level 15). This study estimates BCB concentration up to 656 hPa (level 20, shown in orange). BCB activities persist until 171 hPa (level 35, marked in magenta). This region falls almost entirely within the troposphere. Figure~\ref{fig:conc_sdist_2012} shows the spatial distribution of annual average BCB concentration over the test period, using 2012 as a representative example for all four years in the test set. The figure demonstrates that BCB concentration decreases by three orders of magnitude between 656 and 171 hPa (levels 20 to 35), which makes data preprocessing and training very laborious as the number of input layers and the consequent target variable output layers increase. Figure~\ref{fig:conc_sdist_2012} also shows that the global pattern of BCB concentration changes drastically after level 20.
-    
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=\linewidth]{figs/conc_vprofile_test.png}
-        \caption{Vertical profiles of BCB concentration across the entire 62 atmospheric levels for four different years of the test set.}
-        \label{fig:conc_vprofile_test}
-    \end{figure}
-
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=\linewidth]{figs/conc_sdist_2012.png}
-        \caption{Spatial distribution of annual average BCB concentration during 2012 across eight different pressure levels from 979 hPa (Level 1) to 171 hPa (Level 35). Note the different color scales for each level, with concentrations decreasing by multiple orders of magnitude at higher altitudes.}
-        \label{fig:conc_sdist_2012}
-    \end{figure}
-
+    % \begin{equation}
+    %     \frac{du}{dt} + u\frac{du}{dx} + v\frac{du}{dy} + w(\omega,T,q,z)\frac{du}{dz} = \Sigma
+    %     \label{eq:transport_model}
+    % \end{equation}
 
 \section{Model Architecture} \label{sec:appendix-2}
     The model receives 2D and 3D data separately. According to Figure~\ref{fig:model_architecture}, we used spatial encoders to process two different modalities (2D and 3D variables). Suppose a batch of 3D input tensors $\mathbf{\beta} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{\beta}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each 3D variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D variables with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the identical number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features. In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
