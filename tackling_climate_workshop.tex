@@ -236,6 +236,29 @@
             \label{fig:rsquare}
         \end{figure}
 
+    \subsection{BCB Global Average Over Time} \label{sec:result-scatter}
+        Figures~\ref{fig:global_average_2020} and~\ref{fig:global_average_2021} compare the global average BCB concentrations predicted by the ML model against corresponding ground truth values for 2020 and 2021, respectively (equivalent results for 1853 and 2012 are provided in Appendix~\ref{sec:appendix-2}). The analysis focuses on 2020 and 2021 to evaluate the model's predictive performance on years entirely outside the training domain. Furthermore, 2021 represents one of the most extreme cases of BCB concentration, exhibiting unprecedentedly high values. This comparison evaluates three distinct pressure levels: Level-1 (979 hPa), Level-10 (888.5 hPa), and Level-20 (656 hPa).
+
+        Figures~\ref{fig:global_average_2020}a, c, and e present scatter plots of these comparisons for 2020.  Figures~\ref{fig:global_average_2020}b, d, and f compare the global averages of the model outputs and ground truth values throughout 2020. The results indicate good model performance across all evaluated pressure levels. During the peak period (July through October), the model underestimates the global average BCB concentration at the first pressure level; however, predictions at higher altitudes remain highly consistent with the ground truth. This suggests that the model successfully captures the vertical transport of BCB from the lower to upper troposphere, despite reduced accuracy in representing extreme surface-level events.
+        
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{figs/global_average_2020.png}
+            \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2020. (b, d, f) Comparison of global average values of model outputs and ground truth over 2020.}
+            \label{fig:global_average_2020}
+        \end{figure}
+
+        Figure~\ref{fig:global_average_2021} presents the same analysis for 2021, a year in which BCB concentration at the first pressure level reached unprecedented heights, approximately three times higher than those observed in 2012 and 2020 during peak periods (July through October). This exceptional increase manifests as model underestimation of extreme events. However, this trend diminishes at higher atmospheric levels and is completely resolved by the 20th level, where concentrations follow patterns more consistent with previous years, allowing the model to accurately capture high peaks. This observation highlights a significant achievement of our model architecture: as evidenced across all examples, patterns at higher atmospheric levels function independently from the first pressure level, where high concentrations of BCB (our target variable) accumulate. We attribute this successful vertical representation to the appropriate architectural provisions in the model structure that account for vertical convection and other mechanisms governing BCB transport across the atmospheric vertical profile.
+    
+
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{figs/global_average_2021.png}
+            \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2021. (b, d, f) Comparison of global average values of model outputs and ground truth over 2021.}
+            \label{fig:global_average_2021}
+        \end{figure}
+
+
 \section{Ablation Study}
     We conducted comprehensive ablation studies to evaluate the contributions of individual components in our proposed network architecture. Specifically, we examined the effects of incorporating spatial feature encoders (Encoder), spatial feature transformation for modality fusion (SFT), or removing one or both of these modules. To optimize training resources, each model variant was trained on the entire year of 1852 and evaluated on 2012 data. Table~\ref{tab:ablation_study} presents the performance metrics for different model variants predicting the column burden of BCB, calculated by summing the concentration across all 20 pressure levels for each grid cell. Our results demonstrate that the benchmark model with all components achieves superior performance compared to reduced variants. Removing the SFT module caused a modest decrease in performance, while removing the Encoder module resulted in more significant degradation. Interestingly, the model without both modules slightly outperformed the variant missing only the Encoder, suggesting complex interactions between these architectural components. These findings highlight the critical role of both spatial feature extraction and modality fusion in achieving optimal predictive performance.
 
@@ -337,44 +360,27 @@
             \end{tabular}
         \end{table}
 
-\section{Results} \label{sec:appendix-3}
+\section{Results} \label{sec:appendix-2}
     % TODO: add discussion
     \subsection{BCB Global Average Over Time}
-    Figures~\ref{fig:global_average_1853},~\ref{fig:global_average_2012},~\ref{fig:global_average_2020}, and~\ref{fig:global_average_2021} compare the BCB global averages predicted by ML model with the corresponding ground truth values for 1853, 2012, 2020, and 2021, respectively. This comparison is conducted across three distinct pressure levels: level-1 (979 hPa), level-10 (888.5 hPa), and level-20 (656 hPa).
+    Figures~\ref{fig:global_average_1853}, and~\ref{fig:global_average_2012} show the same analysis presented in Section~\ref{sec:result-scatter}. In these figures, we compare the BCB global averages predicted by ML model with the corresponding ground truth values for 1853, and 2012, respectively. This comparison is conducted across three distinct pressure levels: level-1 (979 hPa), level-10 (888.5 hPa), and level-20 (656 hPa).
     
-    Figures~\ref{fig:global_average_1853}-a,c,e present scatter plots of these comparisons for 1853, demonstrating that the model performs very well for the first and 10th pressure levels, although it tends to overestimate extreme values compared to the ground truth in the higher levels (level-20). This overestimation can be attributed to the model's fine-tuning on 2010 and 2011 data, years characterized by higher BCB emissions and concentrations compared to the preindustrial era (1850s). Consequently, the model has been calibrated for higher values at upper atmospheric levels. Figures~\ref{fig:global_average_1853}-b,d,f compare the global averages of the model outputs and ground truth values throughout the test period. These figures illustrate the model's ability to capture peak season values, though an overestimation at the 20th level occurs from mid-June through October.
-    
-    Figure~\ref{fig:global_average_2012} displays the same analysis for 2012. Results indicate that the model performs exceptionally well across all pressure levels without systematic over- or underestimation. This accuracy likely stems from the model's final training phase being fine-tuned on 2010 and 2011 data, making it particularly familiar with the BCB emission patterns and associated forcing during this time period. The results for 2020 (Figure~\ref{fig:global_average_2020}) are nearly as accurate as those for 2012, though there is some underestimation of extreme values at the first pressure level, while biases at higher levels appear random rather than systematic.
-    
-    Figure~\ref{fig:global_average_2021} presents the analysis for 2021, a year in which BCB concentration at the first pressure level reached unprecedented heights, approximately three times higher than those observed in 2012 and 2020 during peak periods (July through October). This exceptional increase manifests as model underestimation of extreme events. However, this trend diminishes at higher atmospheric levels and is completely resolved by the 20th level, where concentrations follow patterns more consistent with previous years, allowing the model to accurately capture high peaks. This observation highlights a significant achievement of our model architecture: as evidenced across all examples, patterns at higher atmospheric levels function independently from the first pressure level, where high concentrations of BCB (our target variable) accumulate. We attribute this successful vertical representation to the appropriate architectural provisions in the model structure that account for vertical convection and other mechanisms governing BCB transport across the atmospheric vertical profile.
-    
-    
+    Figures~\ref{fig:global_average_1853}a,c, and e present scatter plots of these comparisons for 1853, demonstrating that the model performs very well for the first and 10th pressure levels, although it tends to overestimate extreme values compared to the ground truth in the higher levels (level-20). This overestimation can be attributed to the model's fine-tuning on 2010 and 2011 data, years characterized by higher BCB emissions and concentrations compared to the preindustrial era (1850s). Consequently, the model has been calibrated for higher values at upper atmospheric levels. Figures~\ref{fig:global_average_1853}-b,d,f compare the global averages of the model outputs and ground truth values throughout the test period. These figures illustrate the model's ability to capture peak season values, though an overestimation at the 20th level occurs from mid-June through October.
+
     \begin{figure}[htbp]
         \centering
         \includegraphics[width=\linewidth]{figs/global_average_1853.png}
         \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 1853. (b, d, f) Comparison of global average values of model outputs and ground truth over 1853.}
         \label{fig:global_average_1853}
     \end{figure}
+    
+    Figure~\ref{fig:global_average_2012} displays the same analysis for 2012. Results indicate that the model performs exceptionally well across all pressure levels without systematic over- or underestimation. This accuracy likely stems from the model's final training phase being fine-tuned on 2010 and 2011 data, making it particularly familiar with the BCB emission patterns and associated forcing during this time period. 
 
-    \begin{figure}[htbp]
+    \begin{figure}
         \centering
         \includegraphics[width=\linewidth]{figs/global_average_2012.png}
         \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2012. (b, d, f) Comparison of global average values of model outputs and ground truth over 2012.}
         \label{fig:global_average_2012}
     \end{figure}
-
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=\linewidth]{figs/global_average_2020.png}
-        \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2020. (b, d, f) Comparison of global average values of model outputs and ground truth over 2020.}
-        \label{fig:global_average_2020}
-    \end{figure}
-
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=\linewidth]{figs/global_average_2021.png}
-        \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2021. (b, d, f) Comparison of global average values of model outputs and ground truth over 2021.}
-        \label{fig:global_average_2021}
-    \end{figure}
-
+    
 \end{document}
