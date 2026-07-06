@@ -177,21 +177,6 @@
 \section{Results}
     Table~\ref{tab:model_comparison} presents the performance comparison of the proposed model in terms of R-squared ($R^2$) across different test periods and pressure levels. The $R^2$ values are computed at each timestep for all 20 pressure levels during the test period by comparing ground truth and predicted 2D fields. The values reported in the table represent the temporal average of $R^2$ across all timesteps for each pressure level. Across all test years, the model performance consistently decreases at higher pressure levels (lower atmospheric pressure). We observe a strong correlation between BCB concentration magnitude and $R^2$ values at each level (e.g., correlation coefficient of 0.92 for the 2012 test period). Two primary factors contribute to this performance degradation:
 
-    % \begin{table}[htbp]
-    %     \centering
-    %     \caption{Model performance comparison across different test years and pressure levels.}
-    %     \label{tab:model_comparison}
-    %     \begin{tabularx}{\textwidth}{c|*{12}{X}}
-    %         \hline
-    %         \textbf{Year} & \textbf{L01} & \textbf{L02} & \textbf{L03} & \textbf{L04} & \textbf{L05} & \textbf{L10} & \textbf{L15} & \textbf{L16} & \textbf{L17} & \textbf{L18} & \textbf{L19} & \textbf{L20} \\ 
-    %         \hline
-    %         1853 & 0.92 & 0.90 & 0.87 & 0.86 & 0.85 & 0.84 & 0.79 & 0.76 & 0.73 & 0.68 & 0.58 & 0.37 \\
-    %         2012 & 0.88 & 0.85 & 0.81 & 0.79 & 0.78 & 0.76 & 0.70 & 0.68 & 0.65 & 0.61 & 0.55 & 0.39 \\
-    %         2020 & 0.81 & 0.77 & 0.73 & 0.70 & 0.69 & 0.67 & 0.61 & 0.59 & 0.57 & 0.52 & 0.43 & 0.24 \\
-    %         2021 & 0.82 & 0.80 & 0.76 & 0.74 & 0.73 & 0.70 & 0.63 & 0.61 & 0.58 & 0.55 & 0.50 & 0.36 \\ 
-    %         \hline
-    %     \end{tabularx}
-    % \end{table}
     \begin{table}[htbp]
         \centering
         \caption{Model performance ($R^2$) comparison across different test years and pressure levels (hPa).}
@@ -199,6 +184,7 @@
         \begin{tabularx}{\textwidth}{c|*{12}{X}}
             \hline
             \textbf{Year} & \textbf{979} & \textbf{969} & \textbf{959} & \textbf{949} & \textbf{939} & \textbf{888.5} & \textbf{808.5} & \textbf{784} & \textbf{756.5} & \textbf{726} & \textbf{692.5} & \textbf{656} \\ 
+            % \textbf{Year} & \textbf{L01} & \textbf{L02} & \textbf{L03} & \textbf{L04} & \textbf{L05} & \textbf{L10} & \textbf{L15} & \textbf{L16} & \textbf{L17} & \textbf{L18} & \textbf{L19} & \textbf{L20} \\ 
             \hline
             \textbf{1853} & 0.92 & 0.90 & 0.87 & 0.86 & 0.85 & 0.84 & 0.79 & 0.76 & 0.73 & 0.68 & 0.58 & 0.37 \\
             \textbf{2012} & 0.88 & 0.85 & 0.81 & 0.79 & 0.78 & 0.76 & 0.70 & 0.68 & 0.65 & 0.61 & 0.55 & 0.39 \\
@@ -207,7 +193,6 @@
             \hline
         \end{tabularx}
     \end{table}
-
     
     % i) The target variable is normalized using statistics (mean and standard deviation) derived from the first pressure level BCB concentrations. During training, BCB values at all levels are scaled relative to the first pressure level, which exhibits the highest concentrations. This approach is necessary because standard deviations become very small at higher atmospheric levels. If level-specific statistics were used to normalize BCB concentrations at each individual level, the normalized values at higher levels would artificially increase in magnitude relative to lower levels, contradicting the natural atmospheric trend where concentrations decrease with altitude. However, this global normalization strategy introduces a bias toward lower atmospheric levels, where absolute concentration values are inherently larger. This bias is further exacerbated by the mean squared error (MSE) loss function, which inherently overemphasizes larger concentration values present at lower atmospheric levels during the optimization process.
 
@@ -227,17 +212,56 @@
     \end{figure}
 
     \subsection{Annual Mean BCB Column Burden}
-    To quantify the overall performance of the model across different regions and time periods, we compare the column burden of ground truth (ModelE simulation outputs) with machine learning (ML) predictions (see Figure~\ref{fig:column_burden}). In general, the ML-predicted column densities tend to be biased low compared to ground truth, with this underestimation becoming more pronounced over time. This trend, however, is less evident in tropical regions with high biomass burning activity, such as the Amazon and Central/Southern Africa.
+        To quantify the overall performance of the model across different regions and time periods, we compare the column burden of ground truth (ModelE simulation outputs) with machine learning (ML) predictions (see Figure~\ref{fig:column_burden}). In general, the ML-predicted column densities tend to be biased low compared to ground truth, with this underestimation becoming more pronounced over time. This trend, however, is less evident in tropical regions with high biomass burning activity, such as the Amazon and Central/Southern Africa.
 
-    The model struggles particularly in regions with newly emerging or episodic activity during the test period, such as the US and northeast Russia. Specifically, in 2020 and 2021, the model substantially underestimates values in the US West, a period marked by unprecedented wildfire events that emitted record-breaking amounts of black carbon aerosols and particulates. For instance, the 2020 US wildfire season saw five of the six largest fires on record in California, as well as massive fires in Oregon and Washington, with total burned areas exceeding 8 million acres and resulting in significant spikes in atmospheric black carbon. Similarly, 2021 recorded exceptionally high levels of wildfire carbon emissions, particularly from boreal and Western US fires, driving steep increases in atmospheric soot content~\cite{sannigrahi2022examining}. For northeast Russia, the historical context remains important. According to the statistics of the Global Wildfire Information System (GWIS), the summer of 2012 was the most severe wildfire season in a decade, with extensive burning across the Siberian taiga fueled by abnormal heat and drought conditions, causing dramatic increases in regional black carbon levels. % newly emerging or episodic activity: especially when emissions deviate sharply from climatological norms. 
-    % A wide range of analyses comparing the results in different aspects is presented in Appendix~\ref{sec:appendix-3}.
+        The model struggles particularly in regions with newly emerging or episodic activity during the test period, such as the US and northeast Russia. Specifically, in 2020 and 2021, the model substantially underestimates values in the US West, a period marked by unprecedented wildfire events that emitted record-breaking amounts of black carbon aerosols and particulates. For instance, the 2020 US wildfire season saw five of the six largest fires on record in California, as well as massive fires in Oregon and Washington, with total burned areas exceeding 8 million acres and resulting in significant spikes in atmospheric black carbon. Similarly, 2021 recorded exceptionally high levels of wildfire carbon emissions, particularly from boreal and Western US fires, driving steep increases in atmospheric soot content~\cite{sannigrahi2022examining}. For northeast Russia, the historical context remains important. According to the statistics of the Global Wildfire Information System (GWIS), the summer of 2012 was the most severe wildfire season in a decade, with extensive burning across the Siberian taiga fueled by abnormal heat and drought conditions, causing dramatic increases in regional black carbon levels. % newly emerging or episodic activity: especially when emissions deviate sharply from climatological norms. 
+        % A wide range of analyses comparing the results in different aspects is presented in Appendix~\ref{sec:appendix-3}.
+            
         
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=1\linewidth]{figs/column_burden.png}
+            \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
+            \label{fig:column_burden}
+        \end{figure}
+
+    \subsection{Global Distribution of Coefficient of Determination}
+        Figure~\ref{fig:rsquare} shows spatial variations of R$^2$ from surface pressure level (Level 01) up to Level 20, with darker green areas indicating higher R$^2$ values and white areas representing zero or negative R$^2$ values where the climatological average could perform better than the ML model in those regions. Investigation on the low performance regions shows that the BCB concentrations in these regions (with negative R$^2$ values) are smaller than those in high-concentration regions by several orders of magnitude; thus, the models generally produce random noise in these areas. 
+        Across all test periods, higher R$^2$ values are observed in tropical regions (such as the Amazon and central Africa), as well as parts of the northern mid-latitude zone and Southeast Asia, indicating strong agreement between predictions and ground truth in these areas. Conversely, lower R$^2$ values are prevalent over oceanic regions and certain arid land areas, where BCB concentrations are lower in value compared to regions with major emission sources. 
+        
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=1\linewidth]{figs/rsquare-p.png}
+            \caption{Global distribution of R$^2$ across different pressure levels.}
+            \label{fig:rsquare}
+        \end{figure}
+
+\section{Ablation Study}
+    We conducted comprehensive ablation studies to evaluate the contributions of individual components in our proposed network architecture. Specifically, we examined the effects of incorporating spatial feature encoders (Encoder), spatial feature transformation for modality fusion (SFT), or removing one or both of these modules. To optimize training resources, each model variant was trained on the entire year of 1852 and evaluated on 2012 data. Table~\ref{tab:ablation_study} presents the performance metrics for different model variants predicting the column burden of BCB, calculated by summing the concentration across all 20 pressure levels for each grid cell. Our results demonstrate that the benchmark model with all components achieves superior performance compared to reduced variants. Removing the SFT module caused a modest decrease in performance, while removing the Encoder module resulted in more significant degradation. Interestingly, the model without both modules slightly outperformed the variant missing only the Encoder, suggesting complex interactions between these architectural components. These findings highlight the critical role of both spatial feature extraction and modality fusion in achieving optimal predictive performance.
+
+    \begin{table}[htbp]
+        \centering
+        \caption{Ablation study of each proposed component on performance metrics.}
+        \label{tab:ablation_study}
+        \begin{tabular}{lcccc}
+        \hline
+        \textbf{Encoder} & \textbf{SFT} & \textbf{R$^2$ $\uparrow$} & \textbf{MAE $\downarrow$} & \textbf{RMSE $\downarrow$} \\
+        \hline
+         &  & 0.9439 & 0.0119 & 0.0235 \\
+        \checkmark &  & 0.9424 & 0.0123 & 0.0242 \\
+         & \checkmark & 0.9492 & 0.0117 & 0.0227 \\
+        \checkmark & \checkmark & \textbf{0.9585} & \textbf{0.0104} & \textbf{0.0199} \\
+        \hline
+        \end{tabular}
+    \end{table}
+
+    Figure~\ref{fig:ablation_study} compares the vertical profiles of BCB concentration across 20 atmospheric pressure levels for different model variants. The results demonstrate that the full model most accurately follows the ground truth vertical distribution, with notably lower bias compared to variants lacking spatial feature encoders, spatial feature transformation modules, or both. This visual comparison complements the quantitative metrics in Table~\ref{tab:ablation_study}, illustrating that the full model's superior performance extends beyond integrated column burden to accurately representing concentrations at individual pressure levels throughout the atmospheric profile.
     
     \begin{figure}[htbp]
         \centering
-        \includegraphics[width=1\linewidth]{figs/column_burden.png}
-        \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
-        \label{fig:column_burden}
+        \includegraphics[width=0.5\linewidth]{figs/ablation_study.png}
+        \caption{Impact of model components on vertical profiles of BCB concentration across 20 atmospheric levels.}
+        \label{fig:ablation_study}
     \end{figure}
 
 \section{Conclusion}
@@ -283,9 +307,7 @@
     \end{table}
     
     % According to Equation~\ref{eq:transport_model} and depending on how the convection term is parameterized, the list of required variables may vary. 
-        Several of the aforementioned variables were excluded based on preliminary analysis, including estimation of mutual information for continuous target variables, univariate linear regression tests, recursive feature elimination, and feature importance analysis using Random Forest~\cite{scikit-learn}. This preliminary analysis was necessary because loading all the mentioned 2D and 3D variables creates a significant bottleneck in the training process.
-    
-    Eventually, we selected 2 static variables representing the area of each gridcell and the fraction of land, sea, and ice; four 2D variables existing at the surface including planetary boundary layer height, sensible heat flux, latent heat flux, and BCB biomass source; and eight 3D variables including the velocity field in all three directions, pressure, temperature, potential temperature, relative humidity and precipitation.
+    Several of the aforementioned variables were excluded based on preliminary analysis, including estimation of mutual information for continuous target variables, univariate linear regression tests, recursive feature elimination, and feature importance analysis using Random Forest~\cite{scikit-learn}. This preliminary analysis was necessary because loading all the mentioned 2D and 3D variables creates a significant bottleneck in the training process. Eventually, we selected 2 static variables representing the area of each gridcell and the fraction of land, sea, and ice; four 2D variables existing at the surface including planetary boundary layer height, sensible heat flux, latent heat flux, and BCB biomass source; and eight 3D variables including the velocity field in all three directions, pressure, temperature, potential temperature, relative humidity and precipitation.
     
     % \begin{equation}
     %     \frac{du}{dt} + u\frac{du}{dx} + v\frac{du}{dy} + w(\omega,T,q,z)\frac{du}{dz} = \Sigma
@@ -295,54 +317,32 @@
 % \section{Model Architecture} \label{sec:appendix-2}
     % The model receives 2D and 3D data separately ((see Figure~\ref{fig:model_architecture}). two different spatial encoders were used to process two different data modalities (2D and 3D variables). Suppose a batch of 3D input tensors $\mathbf{\beta} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{\beta}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each 3D variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D variables with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the identical number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features. In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
 
+    \subsection{Atmospheric Levels and Corresponding Pressure Values}
+        Throughout this paper, we refer to atmospheric levels using both pressure values (in hPa) and level nomenclature interchangeably. Table~\ref{tab:pressure_levels} provides the complete mapping between the 20 atmospheric levels and their corresponding pressure values used in our analysis. Readers can reference this table to identify the specific atmospheric level when pressure values are mentioned in the text, figures, or discussions of model performance across different vertical layers of the atmosphere.
+
+        \begin{table}[htbp]
+            \centering
+            \caption{Atmospheric levels and their corresponding pressure values (hPa) used in this study.}
+            \label{tab:pressure_levels}
+            \begin{tabular}{llllllll}
+            \hline
+            Level & Press & Level & Press & Level & Press & Level & Press \\
+            \hline
+            level-01 & 979.0 & level-06 & 929.0 & level-11 & 877.0 & level-16 & 784.0 \\
+            level-02 & 969.0 & level-07 & 919.0 & level-12 & 864.0 & level-17 & 756.5 \\
+            level-03 & 959.0 & level-08 & 909.0 & level-13 & 848.5 & level-18 & 726.0 \\
+            level-04 & 949.0 & level-09 & 899.0 & level-14 & 830.0 & level-19 & 692.5 \\
+            level-05 & 939.0 & level-10 & 888.5 & level-15 & 808.5 & level-20 & 656.0 \\
+            \hline
+            \end{tabular}
+        \end{table}
+
 \section{Results} \label{sec:appendix-3}
-    Throughout this paper, we refer to atmospheric levels using both pressure values (in hPa) and level nomenclature interchangeably. Table~\ref{tab:pressure_levels} provides the complete mapping between the 20 atmospheric levels and their corresponding pressure values used in our analysis. Readers can reference this table to identify the specific atmospheric level when pressure values are mentioned in the text, figures, or discussions of model performance across different vertical layers of the atmosphere.
-
-    \begin{table}[htbp]
-        \centering
-        \caption{Atmospheric pressure levels and their corresponding pressure values (hPa) used in this study.}
-        \label{tab:pressure_levels}
-        \begin{tabular}{llllllll}
-        \hline
-        Level & Press & Level & Press & Level & Press & Level & Press \\
-        \hline
-        level-01 & 979.0 & level-06 & 929.0 & level-11 & 877.0 & level-16 & 784.0 \\
-        level-02 & 969.0 & level-07 & 919.0 & level-12 & 864.0 & level-17 & 756.5 \\
-        level-03 & 959.0 & level-08 & 909.0 & level-13 & 848.5 & level-18 & 726.0 \\
-        level-04 & 949.0 & level-09 & 899.0 & level-14 & 830.0 & level-19 & 692.5 \\
-        level-05 & 939.0 & level-10 & 888.5 & level-15 & 808.5 & level-20 & 656.0 \\
-        \hline
-        \end{tabular}
-    \end{table}
-    
-    % \subsection{Annual Mean BCB Column Burden}
-    % To quantify the overall performance of the model across different regions and time periods, we compare the column burden of ground truth (ModelE simulation outputs) with machine learning (ML) predictions (see Figure~\ref{fig:column_burden}). In general, the ML-predicted column densities tend to be biased low compared to ground truth, with this underestimation becoming more pronounced over time. This trend, however, is less evident in tropical regions with high biomass burning activity, such as the Amazon and Central/Southern Africa.
-
-    % The model struggles particularly in regions with newly emerging or episodic activity during the test period, such as the US and northeast Russia. Specifically, in 2020 and 2021, the model substantially underestimates values in the US West, a period marked by unprecedented wildfire events that emitted record-breaking amounts of black carbon aerosols and particulates. For instance, the 2020 US wildfire season saw five of the six largest fires on record in California, and massive fires in Oregon and Washington, with total burned areas exceeding 8 million acres and resulting in significant spikes in atmospheric black carbon. Similarly, 2021 recorded exceptionally high levels of wildfire carbon emissions, particularly from boreal and Western US fires, driving steep increases in atmospheric soot content~\cite{sannigrahi2022examining}. For northeast Russia, the historical context remains important. According to the statistics of Global Wildfire Information System (GWIS), the summer of 2012 was the most severe wildfire season in a decade, with extensive burning across the Siberian taiga fueled by abnormal heat and drought conditions, causing dramatic increases in regional black carbon levels. % newly emerging or episodic activity: especially when emissions deviate sharply from climatological norms. 
-    
-    % \begin{figure}[htbp]
-    %     \centering
-    %     \includegraphics[width=1\linewidth]{column_burden.png}
-    %     \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
-    %     \label{fig:column_burden}
-    % \end{figure}
-
-    \subsection{Global Distribution of Coefficient of Determination}
-    Figure~\ref{fig:rsquare} shows spatial variations of R$^2$ from surface pressure level (Level 01) up to Level 20, with darker green areas indicating higher R$^2$ values and white areas representing zero or negative R$^2$ values where the climatological average could perform better than the ML model in those regions. Investigation on the low performance regions shows that the BCB concentrations in these regions (with negative R$^2$ values) are smaller than those in high-concentration regions by several orders of magnitude; thus, the models generally produce random noise in these areas. 
-    Across all test periods, higher R$^2$ values are observed in tropical regions (such as the Amazon and central Africa), as well as parts of the northern mid-latitude zone and Southeast Asia, indicating strong agreement between predictions and ground truth in these areas. Conversely, lower R$^2$ values are prevalent over oceanic regions and certain arid land areas, where BCB concentrations are lower in value compared to regions with major emission sources. 
-    
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=1\linewidth]{figs/rsquare-p.png}
-        \caption{Global distribution of R$^2$ across different pressure levels.}
-        \label{fig:rsquare}
-    \end{figure}
-
     % TODO: add discussion
     \subsection{BCB Global Average Over Time}
-    Figures~\ref{fig:global_average_1853},~\ref{fig:global_average_2012},~\ref{fig:global_average_2020}, and~\ref{fig:global_average_2021} compare the BCB global averages predicted by ML model with the corresponding ground truth values for 1853, 2012, 2020, and 2021, respectively. This comparison is conducted across three distinct pressure levels: level 1 (979 hPa), level 10 (888.5 hPa), and level 20 (656 hPa).
+    Figures~\ref{fig:global_average_1853},~\ref{fig:global_average_2012},~\ref{fig:global_average_2020}, and~\ref{fig:global_average_2021} compare the BCB global averages predicted by ML model with the corresponding ground truth values for 1853, 2012, 2020, and 2021, respectively. This comparison is conducted across three distinct pressure levels: level-1 (979 hPa), level-10 (888.5 hPa), and level-20 (656 hPa).
     
-    Figures~\ref{fig:global_average_1853}-a,c,e present scatter plots of these comparisons for 1853, demonstrating that the model performs very well for the first and 10th pressure levels, although it tends to overestimate extreme values compared to the ground truth in the higher levels (level 20). This overestimation can be attributed to the model's fine-tuning on 2010 and 2011 data, years characterized by higher BCB emissions and concentrations compared to the preindustrial era (1850s). Consequently, the model has been calibrated for higher values at upper atmospheric levels. Figures~\ref{fig:global_average_1853}-b,d,f compare the global averages of the model outputs and ground truth values throughout the test period. These figures illustrate the model's ability to capture peak season values, though an overestimation at the 20th level occurs from mid-June through October.
+    Figures~\ref{fig:global_average_1853}-a,c,e present scatter plots of these comparisons for 1853, demonstrating that the model performs very well for the first and 10th pressure levels, although it tends to overestimate extreme values compared to the ground truth in the higher levels (level-20). This overestimation can be attributed to the model's fine-tuning on 2010 and 2011 data, years characterized by higher BCB emissions and concentrations compared to the preindustrial era (1850s). Consequently, the model has been calibrated for higher values at upper atmospheric levels. Figures~\ref{fig:global_average_1853}-b,d,f compare the global averages of the model outputs and ground truth values throughout the test period. These figures illustrate the model's ability to capture peak season values, though an overestimation at the 20th level occurs from mid-June through October.
     
     Figure~\ref{fig:global_average_2012} displays the same analysis for 2012. Results indicate that the model performs exceptionally well across all pressure levels without systematic over- or underestimation. This accuracy likely stems from the model's final training phase being fine-tuned on 2010 and 2011 data, making it particularly familiar with the BCB emission patterns and associated forcing during this time period. The results for 2020 (Figure~\ref{fig:global_average_2020}) are nearly as accurate as those for 2012, though there is some underestimation of extreme values at the first pressure level, while biases at higher levels appear random rather than systematic.
     
@@ -375,35 +375,6 @@
         \includegraphics[width=\linewidth]{figs/global_average_2021.png}
         \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2021. (b, d, f) Comparison of global average values of model outputs and ground truth over 2021.}
         \label{fig:global_average_2021}
-    \end{figure}
-
-
-\section{Ablation Study}
-    We conducted comprehensive ablation studies to evaluate the contributions of individual components in our proposed network architecture. Specifically, we examined the effects of incorporating spatial feature encoders (Encoder), spatial feature transformation for modality fusion (SFT), or removing one or both of these modules. To optimize training resources, each model variant was trained on the entire year of 1852 and evaluated on 2012 data. Table~\ref{tab:ablation_study} presents the performance metrics for different model variants predicting the column burden of BCB, calculated by summing the concentration across all 20 pressure levels for each grid cell. Our results demonstrate that the benchmark model with all components achieves superior performance compared to reduced variants. Removing the SFT module caused a modest decrease in performance, while removing the Encoder module resulted in more significant degradation. Interestingly, the model without both modules slightly outperformed the variant missing only the Encoder, suggesting complex interactions between these architectural components. These findings highlight the critical role of both spatial feature extraction and modality fusion in achieving optimal predictive performance.
-
-    \begin{table}[htbp]
-        \centering
-        \caption{Ablation study of each proposed component on performance metrics.}
-        \label{tab:ablation_study}
-        \begin{tabular}{lcccc}
-        \hline
-        \textbf{Encoder} & \textbf{SFT} & \textbf{R$^2$ $\uparrow$} & \textbf{MAE $\downarrow$} & \textbf{RMSE $\downarrow$} \\
-        \hline
-         &  & 0.9439 & 0.0119 & 0.0235 \\
-        \checkmark &  & 0.9424 & 0.0123 & 0.0242 \\
-         & \checkmark & 0.9492 & 0.0117 & 0.0227 \\
-        \checkmark & \checkmark & \textbf{0.9585} & \textbf{0.0104} & \textbf{0.0199} \\
-        \hline
-        \end{tabular}
-    \end{table}
-
-    Figure~\ref{fig:ablation_study} compares the vertical profiles of BCB concentration across 20 atmospheric pressure levels for different model variants. The results demonstrate that the full model most accurately follows the ground truth vertical distribution, with notably lower bias compared to variants lacking spatial feature encoders, spatial feature transformation modules, or both. This visual comparison complements the quantitative metrics in Table~\ref{tab:ablation_study}, illustrating that the full model's superior performance extends beyond integrated column burden to accurately representing concentrations at individual pressure levels throughout the atmospheric profile.
-    
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=0.5\linewidth]{figs/ablation_study.png}
-        \caption{Impact of model components on vertical profiles of BCB concentration across 20 atmospheric levels.}
-        \label{fig:ablation_study}
     \end{figure}
 
 \end{document}
