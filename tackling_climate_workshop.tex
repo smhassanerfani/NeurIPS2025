@@ -99,27 +99,60 @@
 \section{Methodology}
     In this work, we emulate the prediction of BCB (Black Carbon from Biomass Burning) transport for the first 20 vertical levels (up to 600 hPa) of the NASA GISS-E3 ESM model (tropospheric portion). Specifically, we aim to forecast the 3D field of BCB concentration in the atmosphere at timestep $t$, given meteorological inputs (e.g., wind components and precipitation) and BCB surface fluxes from the previous 47 timesteps. The list of candidate variables, their description, units and dimensions on spatial domain are showed in Appendix~\ref{sec:appendix-1}.
 
-    The scope of this project focuses on the troposphere. Based on the pressure range for the troposphere (1000 to 200 mbar), the total number of levels required to cover the entire troposphere is between 30 and 40. However, considering the BCB concentration distribution across vertical levels, BCB concentrations drop significantly after the 20th level, making data preprocessing and training computationally intensive. Given that ML architectures with high inductive biases in the spatial domain generally focus on regions with high concentrations to avoid penalization through the loss function (Mean Squared Error in this case), the first 20 vertical levels (up to 600 hPa) were selected for processing. This vertical range covers nearly the entire BCB concentration distribution in the troposphere, where significant variation due to surface-level emissions is observed.
+    \subsection{Atmospheric Tracer Transport}
+        When numerically integrating the continuity equation for a tracer $\mu$ over a discrete grid, the evolution is typically split into horizontal advection, vertical convection, and sink/source terms as follows: 
 
-    Figure~\ref{fig:conc_vprofile_test} shows the BCB concentration profile across all 62 vertical levels of ModelE3 for the 4-year test period. As evident from the figure, BCB concentration begins to deplete after 808 hPa (level 15). This study estimates BCB concentration up to 656 hPa (level 20, shown in orange). BCB activities persist until 171 hPa (level 35, marked in magenta). This region falls almost entirely within the troposphere. Figure~\ref{fig:conc_sdist_2012} shows the spatial distribution of annual average BCB concentration over the test period, using 2012 as a representative example for all four years in the test set. The figure demonstrates that BCB concentration decreases by three orders of magnitude between 656 and 171 hPa (levels 20 to 35), which makes data preprocessing and training very laborious as the number of input layers and the consequent target variable output layers increase. Figure~\ref{fig:conc_sdist_2012} also shows that the global pattern of BCB concentration changes drastically after level 20.
-    
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=\linewidth]{figs/conc_vprofile_test.png}
-        \caption{Vertical profiles of BCB concentration across the entire 62 atmospheric levels for four different years of the test set.}
-        \label{fig:conc_vprofile_test}
-    \end{figure}
+        \begin{equation}
+        \frac{\partial\mu}{\partial t} + u\frac{\partial\mu}{\partial x} + v\frac{\partial\mu}{\partial y} + w\frac{\partial\mu}{\partial z} = \Sigma
+        \label{eq:transport-formula}
+        \end{equation}
 
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=\linewidth]{figs/conc_sdist_2012.png}
-        \caption{Spatial distribution of annual average BCB concentration during 2012 across eight different pressure levels from 979 hPa (Level 1) to 171 hPa (Level 35). Note the different color scales for each level, with concentrations decreasing by multiple orders of magnitude at higher altitudes.}
-        \label{fig:conc_sdist_2012}
-    \end{figure}
+        where $u$, $v$, and $w$ are the horizontal and vertical wind components, respectively, and $\Sigma$ represents the sink/source terms. The tracer concentration $\mu$ is the prognostic variable. It carries an explicit time derivative and is stepped forward in time. The vertical velocity ($w$), however, is a diagnostic variable that drives the vertical convection and determined from the current atmospheric state, such as temperature ($T$), specific humidity ($q$), geopotential height ($z$), and other variables depending on the specific parameterization scheme:
 
-    
+        \begin{equation}
+        w = \mathcal{F}(T, q, z, \dots)
+        \end{equation}
+
+
+        It is instructive to rearrange the tracer transport equation to better align with the ML formalizations. If, instead of parameterizing only the vertical convection component, an ML model $(\mathcal{N}_{\theta})$ is adopted to surrogate all advection and source/sink dynamics simultaneously, the equation can be recast to isolate the local time derivative. This frames the problem in terms of the overall instantaneous tendency of the tracer:
+
+        \begin{equation}
+        \frac{\partial \mu}{\partial t} = \mathcal{N}_{\theta}(\mu,\, u,\, v,\, w,\, T,\, q,\, z,\, \dots)
+        \end{equation}
+
+        Under this formulation, the neural network acts as a complete \textbf{tendency operator}. It learns the instantaneous rate of change for the prognostic variable $\mu$ based entirely on the concurrent atmospheric state. Once the operator $\mathcal{N}_{\theta}$ produces this approximate tendency, the prognostic tracer is marched forward using a standard numerical integration scheme:
+
+        \begin{equation}
+        \mu_{t+1} = \mu_t + \left( \frac{\partial \mu}{\partial t} \right) \Delta t
+        \end{equation}
+
+        This procedure naturally maps to an \textbf{autoregressive rollout}: the learned tendency operator is applied repeatedly, step-by-step, to evolve the prognostic state forward in time. This approach is thoroughly investigated in~\cite{benson2025atmospheric}.
+
+        However, a data-driven perspective motivates a completely different framing: the spatiotemporal predictive learning approach~\citep{erfani2026spatiotemporal}. Given a sequence $\mathbf{X}^{t,T} = \{x_{t-T+1}, \dots, x_t\}$ representing the past $T$ frames up to time $t$, model aims to predict the subsequent $T'$ frames $\mathbf{Y}^{t+1,T'} = \{x_{t+1}, \dots, x_{t+T'}\}$. Here, each frame $x_i \in \mathbb{R}^{C \times H \times W}$ is treated as an image with $C$ channels, height $H$, and width $W$. In practice, these sequences are represented as high-dimensional tensors, i.e., $\mathbf{X} \in \mathbb{R}^{T \times C \times H \times W}$. A model with learnable parameters $\theta$ then learns a mapping $\mathcal{N}_{\theta} : \mathbf{X}^{t,T} \mapsto \mathbf{Y}^{t+1,T'}$ by extracting combined spatial and temporal dependencies. In this formalization, the entire transport problem is reduced to multichannel spatiotemporal arrays, and the surrogate is no longer an explicit tendency operator. Instead, it becomes a spatiotemporal sequence model, often realized through a recurrent architectures, 3D Convolutional Neural Networks, or transformer architectures that maps the recent history of atmospheric states directly to the tracer concentration field at the next time step ~\citep{tran2015learning, shi2015convolutional, bertasius2021timesformer, arnab2021vivit}
+
     \subsection{Dataset Description}
-        To train the ML model, the NASA GISS-E3 (ModelE) was run with prescribed sea surface temperature (SST) and sea ice fraction for three different time periods. First, the pre-industrial era from 1851 to 1853 (3 years), yielding 3 years of data (E3OMA1850M). For this period, monthly-averaged BCB concentrations were interpolated to daily intervals, as no daily inventory exists for this time period. The second dataset spans 2010 to 2012 (3 years) (E3OMA2010D). Since this period falls within the satellite era, daily BCB concentrations were used for this run. The third dataset covers 2020 and 2021 (2 years) (E3OMA2020D). Like the 2010 dataset, this run is based on daily BCB concentrations and is considered for testing the model on entirely different time periods outside the training domain.
+        To train the ML model, the NASA GISS-E3 (ModelE) was run with prescribed sea surface temperature (SST) and sea ice fraction for three different time periods. First, the pre-industrial era from 1851 to 1853 (3 years), yielding 3 years of data. For this period, monthly-averaged BCB concentrations were interpolated to daily intervals, as no daily inventory exists for this time period. The second dataset spans 2010 to 2012 (3 years). Since this period falls within the satellite era, daily BCB concentrations were used for this run. The third dataset covers 2020 and 2021 (2 years). Like the 2010 dataset, this run is based on daily BCB concentrations and is considered for testing the model on entirely different time periods outside the training domain.
+        
+        The scope of this project focuses on the troposphere. Based on the pressure range for the troposphere (1000 to 200 mbar), the total number of levels required to cover the entire troposphere is between 30 and 40. However, considering the BCB concentration distribution across vertical levels, BCB concentrations drop significantly after the 20th level, making data preprocessing and training computationally intensive. Given that ML architectures with high inductive biases in the spatial domain generally focus on regions with high concentrations to avoid penalization through the loss function (Mean Squared Error in this case), the first 20 vertical levels (up to 600 hPa) were selected for processing. This vertical range covers nearly the entire BCB concentration distribution in the troposphere, where significant variation due to surface-level emissions is observed.
+
+        Figure~\ref{fig:conc_vprofile_test} shows the BCB concentration profile across all 62 vertical levels of ModelE3 for the 4-year test period. As evident from the figure, BCB concentration begins to deplete after 808 hPa (level 15). This study estimates BCB concentration up to 656 hPa (level 20, shown in orange). BCB activities persist until 171 hPa (level 35, marked in magenta). This region falls almost entirely within the troposphere. Figure~\ref{fig:conc_sdist_2012} shows the spatial distribution of annual average BCB concentration over the test period, using 2012 as a representative example for all four years in the test set. The figure demonstrates that BCB concentration decreases by three orders of magnitude between 656 and 171 hPa (levels 20 to 35), which makes data preprocessing and training very laborious as the number of input layers and the consequent target variable output layers increase. Figure~\ref{fig:conc_sdist_2012} also shows that the global pattern of BCB concentration changes drastically after level 20.
+        
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{figs/conc_vprofile_test.png}
+            \caption{Vertical profiles of BCB concentration across the entire 62 atmospheric levels for four different years of the test set.}
+            \label{fig:conc_vprofile_test}
+        \end{figure}
+
+
+
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{figs/conc_sdist_2012.png}
+            \caption{Spatial distribution of annual average BCB concentration during 2012 across eight different pressure levels from 979 hPa (Level 1) to 171 hPa (Level 35).}
+            % Note the different color scales for each level, with concentrations decreasing by multiple orders of magnitude at higher altitudes.}
+            \label{fig:conc_sdist_2012}
+        \end{figure}
 
     \subsection{Model Architecture}
         We propose a spatiotemporal ML approach to project the effects of interactive emissions on climate forcing. Before data is fed into the spatiotemporal model, they are passed into a preprocessing module for spatial feature extraction and modality fusion. To do this, we employ spatial encoders~\cite{tan2023temporal} that process two data modalities (2D surface variables and 3D forcing) individually and transform them into an identical dimension in the latent space. Results are then fused via Spatial Feature Transform (SFT)~\cite{wang2018recovering} which generally modulates (affine transform) the 3D forcing given 2D variables. Since the horizontal dimensions are preserved throughout this processing pipeline, the output maintains four dimensions (i.e., time, features, latitude, and longitude) enabling seamless integration with any spatiotemporal model architecture regardless of their spatial domain representation approach~\cite{tan2023openstl}. Here, we employ ConvLSTM~\cite{shi2015convolutional} with a rectangular latitude-longitude grid representation, as extensive prior research has established effective approaches in this area and spatial representation was not our primary focus. The details of the model architecture is elaborated in the Appendix~\ref{sec:appendix-2}.
