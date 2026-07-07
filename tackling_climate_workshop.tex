@@ -1,25 +1,12 @@
-\documentclass{article}
-
-% if you need to pass options to natbib, use, e.g.:
-%     \PassOptionsToPackage{numbers, compress}{natbib}
-% before loading tackling_climate_workshop_style
-
-% ready for submission
-% \usepackage{tackling_climate_workshop_style}
-
-% to compile a preprint version, e.g., for submission to arXiv, add add the
-% [preprint] option:
-    % \usepackage[preprint]{tackling_climate_workshop_style}
-
-% to compile a camera-ready version, add the [final] option, e.g.:
-    \usepackage[final]{tackling_climate_workshop_style}
-
-% to avoid loading the natbib package, add option nonatbib:
-     % \usepackage[nonatbib]{tackling_climate_workshop_style}
+\documentclass[11pt]{article}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-\usepackage{hyperref}       % hyperlinks
+\usepackage[margin=1in]{geometry}
+\usepackage{times}            % standard serif text font
+\usepackage{authblk}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}      % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
@@ -29,54 +16,27 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{tabularx}
-% \usepackage{draftwatermark}
 
+% \usepackage{draftwatermark}
+\usepackage{lineno}
+\linenumbers
 
 \title{Interactive Atmospheric Composition Emulation for Next-Generation Earth System Models}
 
-% The \author macro works with any number of authors. There are two commands
-% used to separate the names and addresses of multiple authors: \And and \AND.
-%
-% Using \And between authors leaves it to LaTeX to determine where to break the
-% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
-% authors names on the first line, and the last on the second line, try using
-% \AND instead of \And before the third author name.
+\author[1,2,4]{Mohammad H. Erfani\thanks{Corresponding author: \texttt{moerfani@ucsd.edu}}}
+\author[3]{Kara D. Lamb}
+\author[4]{Susanne E. Bauer}
+\author[2,4]{Kostas Tsigaridis}
+\author[2,4]{Marcus van Lier-Walqui}
+\author[4]{Gavin Schmidt}
 
-\author{%
-    Mohammad H. Erfani\thanks{Corresponding author (\texttt{smhassan.erfani@gmail.com})} \\
-    Center for Climate Systems Research\\
-    Columbia University\\
-    New York, NY 10025 \\
-    % \\
-    \And
-    Kara D. Lamb \\
-    Department of Earth and Environmental Engineering \\
-    Columbia University \\
-    New York, NY 10027\\
-    % \texttt{kl3231@columbia.edu} \\
-    \And
-    Susanne E. Bauer \\
-    NASA Goddard Institute for Space Studies\\
-    New York, NY 10025 \\
-    % \texttt{susanne.e.bauer@nasa.gov} \\
-    \And
-    Kostas Tsigaridis \\
-    Center for Climate Systems Research\\
-    Columbia University\\
-    New York, NY 10025 \\
-    % \texttt{kt2347@columbia.edu} \\
-    \And
-    Marcus van Lier-Walqui\\
-    Center for Climate Systems Research\\
-    Columbia University\\
-    New York, NY 10025\\
-    % \texttt{mv2525@columbia.edu} \\
-    \And
-    Gavin Schmidt\\
-    NASA Goddard Institute for Space Studies\\
-    New York, NY 10025 \\
-    % \texttt{gavin.a.schmidt@nasa.gov} \\
-}
+\affil[1]{Center for Western Weather and Water Extremes (CW3E), Scripps Institution of Oceanography, University of California San Diego, La Jolla, CA 92093, USA}
+\affil[2]{Center for Climate Systems Research, Columbia University, New York, NY 10025, USA}
+\affil[3]{Department of Earth and Environmental Engineering, Columbia University, New York, NY 10027, USA}
+\affil[4]{NASA Goddard Institute for Space Studies, New York, NY 10025, USA}
+
+\renewcommand\Affilfont{\small}
+\date{}
 
 \begin{document}
 
@@ -86,11 +46,12 @@
     Interactive simulation of atmospheric composition in Earth System Models (ESMs) are computationally expensive as they transport numerous gaseous and aerosol tracers at each timestep. This limits higher-resolution transient climate simulations with current computational resources. ESMs like NASA GISS-ModelE3 (ModelE) often use pre-computed monthly-averaged atmospheric composition concentrations (Non-Interactive Tracers or NINT) to reduce computational costs. While NINT significantly cuts computations, it fails to capture real-time feedback between aerosols and other climate processes by relying on pre-calculated fields. We extended the ModelE NINT version using machine learning (ML) to create Smart-NINT, which emulates interactive emissions. Smart-NINT interactively calculates atmospheric concentrations using ML with surface emissions and meteorological forcings as inputs, avoiding full physics parameterizations. Our approach utilizes a spatiotemporal architecture that possesses a well-matched inductive bias to effectively capture the spatial and temporal dependencies in tracer evolution. This study focuses on carbonaceous aerosols, particularly Black Carbon from biomass burning (BCB), the most significant absorbing aerosol species in terms of its direct radiative forcing impacts. Input data was processed up until the first 20 vertical levels (from the surface up to 656 hPa) using the ModelE OMA scheme. This vertical range covers nearly the entire BCB concentration distribution in the troposphere where significant variation on short time horizons due to surface level emissions is observed. Our evaluation shows excellent model performance with R² values of 0.92 and Pearson r of 0.96 at the first pressure level. This high performance continues through level 15 (808.5 hPa), then gradually decreases as BCB concentrations drop significantly. The model maintains acceptable performance even when tested on data from entirely different periods outside the training domain, which is a crucial capability for climate modeling applications requiring reliable long-term projections. These results confirm that our approach successfully shifts the paradigm from simple numerical solver mimicry to spatiotemporal modeling, offering significant improvements in forecasting capability for long-term climate simulations.
 \end{abstract}
 
+\newpage
 \section{Introduction}
-    Earth System Models (ESM) are foundational tools in climate science, combining numerical representations of atmospheric fluid dynamics and other Earth physical processes, such as the ocean, land surface, and cryosphere, on three-dimensional grids~\cite{erfani2024spatiotemporal}. Despite their importance, ESMs still have significant shortcomings, including imperfect physical parameterizations, insufficient resolution to resolve fine-scale weather phenomena, and prohibitively high computational costs for operational forecasting. To address these limitations, researchers have increasingly turned to advanced machine learning (ML) techniques. These efforts were pioneered by~\cite{dueben2018challenges,scher2018toward,weyn2019can} where utilizing deep convolutional neural networks (CNNs) for globally gridded weather prediction. The focus is on developing a data-driven ML-based model that can be iteratively stepped forward, similar to traditional numerical weather prediction (NWP) models, to simulate atmospheric states at arbitrarily long lead times~\cite{scher2018predicting,scher2019weather,weyn2020improving,weyn2021sub}.    
+    Earth System Models (ESM) are foundational tools in climate science, combining numerical representations of atmospheric fluid dynamics and other Earth physical processes, such as the ocean, land surface, and cryosphere, on three-dimensional grids~\cite{erfani2024spatiotemporal}. Despite their importance, ESMs still have significant shortcomings, including imperfect physical parameterizations, insufficient resolution to resolve fine-scale weather phenomena, and prohibitively high computational costs for operational forecasting. To address these limitations, researchers have increasingly turned to advanced machine learning (ML) techniques. These efforts were pioneered by~\cite{dueben2018challenges,scher2018toward,weyn2019can} where utilizing deep convolutional neural networks (CNNs) for globally gridded weather prediction. The focus is on developing a data-driven ML-based model that can be iteratively stepped forward, similar to traditional numerical weather prediction (NWP) models, to simulate atmospheric states at arbitrarily long lead times~\cite{scher2018predicting,scher2019weather,weyn2021sub,keisler2022forecasting, pathak2022fourcastnet,pmlr-v202-bonev23a,bi2023accurate,lam2023learning,chen2023fuxi}.    
     % Specifically, DLWP CNNs directly map atmospheric state $u(t)$ to its future state $u(t + \Delta t)$ by learning from historical weather observations, with $\Delta t$ set to 6 hours~\cite{weyn2019can,weyn2020improving,weyn2021sub}.
 
-    Recent studies has continued to follow traditional numerical solver approaches while working to better represent global grid data. These efforts have explored various representations including equiangular gnomonic cubed spheres~\cite{weyn2020improving}, spherical harmonic functions~\cite{pmlr-v202-bonev23a}, multi-mesh graph structures~\cite{lam2023learning}, and customized, geometry-aware tokenizers~\cite{bi2023accurate, nguyen2023climax}. The primary aim of these approaches is to better capture spatial relationships across three-dimensional atmospheric grids by incorporating ML modules with stronger inductive biases for grid-point connectivity. Despite these architectural advances, however, the temporal dimension has received comparatively little attention and still rely on ``autoregressive rollout'' approaches similar to numerical schemes for weather prediction systems. This approach represents a major limitation for stable long-term forecasting, particularly for atmospheric dynamics, which are fundamentally time-dependent processes. Some studies address this problem in the same autoregressive framework by introducing architectural and training-level interventions that constrain the temporal evolution of the predicted states~\citep{watt2023ace, guan2025lucie}.     
+    Recent studies has continued to follow traditional numerical solver approaches while working to better represent global grid data. These efforts have explored various representations including equiangular gnomonic cubed spheres~\cite{weyn2020improving}, spherical harmonic functions~\cite{pmlr-v202-bonev23a}, multi-mesh graph structures~\cite{lam2023learning}, and customized, geometry-aware tokenizers~\cite{bi2023accurate, nguyen2023climax}. The primary aim of these approaches is to better capture spatial relationships across three-dimensional atmospheric grids by incorporating ML modules with stronger inductive biases for grid-point connectivity. Despite these architectural advances, however, the temporal dimension has received comparatively little attention and still rely on ``autoregressive rollout'' approaches similar to numerical schemes for weather prediction systems. This approach represents a major limitation for stable long-term forecasting, particularly for atmospheric dynamics, which are fundamentally time-dependent processes. Some studies address this problem in the same autoregressive framework by introducing architectural and training-level interventions that constrain the temporal evolution of the predicted states~\cite{watt2023ace, guan2025lucie}.     
  
     In the spatial domain, most studies focus their design efforts primarily on horizontal interactions, treating vertical structure as generic feature channels. The models typically receive an array of input values per horizontal grid cell, which they process in a latent space, presumably to account for column physics and vertical mixing implicitly~\cite{lam2023learning,lang2024aifs}. However, the choice of appropriate ML components (modules) that can capture the inherent characteristics of a specific task is crucial for model performance. For instance, attention mechanisms~\cite{vaswani2017attention} revolutionized natural language processing by enabling models to dynamically focus on relevant parts of input sequences regardless of distance, outperforming previous sequential models like bidirectional LSTMs that processed sentences in a rigid, linear fashion~\cite{peters2018deep}. Similarly, developing specialized vertical modeling components could unlock significant breakthroughs in atmospheric modeling by properly accounting for column physics, i.e., capturing the complex multi-level interactions and dependencies that govern atmospheric dynamics. Just as attention mechanisms gave NLP models the ability to handle long-range dependencies in text, purpose-built ML components for vertical atmospheric modeling could better represent the unique physical processes occurring across different atmospheric layers.
 
@@ -107,6 +68,7 @@
         \label{eq:transport-formula}
         \end{equation}
 
+        \noindent
         where $u$, $v$, and $w$ are the horizontal and vertical wind components, respectively, and $\Sigma$ represents the sink/source terms. The tracer concentration $\mu$ is the prognostic variable. It carries an explicit time derivative and is stepped forward in time. The vertical velocity ($w$), however, is a diagnostic variable that drives the vertical convection and determined from the current atmospheric state, such as temperature ($T$), specific humidity ($q$), geopotential height ($z$), and other variables depending on the specific parameterization scheme:
 
         \begin{equation}
@@ -120,15 +82,17 @@
         \frac{\partial \mu}{\partial t} = \mathcal{N}_{\theta}(\mu,\, u,\, v,\, w,\, T,\, q,\, z,\, \dots)
         \end{equation}
 
+        \noindent
         Under this formulation, the neural network acts as a complete \textbf{tendency operator}. It learns the instantaneous rate of change for the prognostic variable $\mu$ based entirely on the concurrent atmospheric state. Once the operator $\mathcal{N}_{\theta}$ produces this approximate tendency, the prognostic tracer is marched forward using a standard numerical integration scheme:
 
         \begin{equation}
         \mu_{t+1} = \mu_t + \left( \frac{\partial \mu}{\partial t} \right) \Delta t
         \end{equation}
 
+        \noindent
         This procedure naturally maps to an \textbf{autoregressive rollout}: the learned tendency operator is applied repeatedly, step-by-step, to evolve the prognostic state forward in time. This approach is thoroughly investigated in~\cite{benson2025atmospheric}.
 
-        However, a data-driven perspective motivates a completely different framing: the spatiotemporal predictive learning approach~\citep{erfani2026spatiotemporal}. Given a sequence $\mathbf{X}^{t,T} = \{x_{t-T+1}, \dots, x_t\}$ representing the past $T$ frames up to time $t$, model aims to predict the subsequent $T'$ frames $\mathbf{Y}^{t+1,T'} = \{x_{t+1}, \dots, x_{t+T'}\}$. Here, each frame $x_i \in \mathbb{R}^{C \times H \times W}$ is treated as an image with $C$ channels, height $H$, and width $W$. In practice, these sequences are represented as high-dimensional tensors, i.e., $\mathbf{X} \in \mathbb{R}^{T \times C \times H \times W}$. A model with learnable parameters $\theta$ then learns a mapping $\mathcal{N}_{\theta} : \mathbf{X}^{t,T} \mapsto \mathbf{Y}^{t+1,T'}$ by extracting combined spatial and temporal dependencies. In this formalization, the entire transport problem is reduced to multichannel spatiotemporal arrays, and the surrogate is no longer an explicit tendency operator. Instead, it becomes a spatiotemporal sequence model, often realized through a recurrent architectures, 3D Convolutional Neural Networks, or transformer architectures that maps the recent history of atmospheric states directly to the tracer concentration field at the next time step ~\citep{tran2015learning, shi2015convolutional, bertasius2021timesformer, arnab2021vivit}
+        However, a data-driven perspective motivates a completely different framing: the spatiotemporal predictive learning approach~\cite{erfani2026spatiotemporal, erfani2026genealogy}. Given a sequence $\mathbf{X}^{t,T} = \{x_{t-T+1}, \dots, x_t\}$ representing the past $T$ frames up to time $t$, model aims to predict the subsequent $T'$ frames $\mathbf{Y}^{t+1,T'} = \{x_{t+1}, \dots, x_{t+T'}\}$. Here, each frame $x_i \in \mathbb{R}^{C \times H \times W}$ is treated as an image with $C$ channels, height $H$, and width $W$. In practice, these sequences are represented as high-dimensional tensors, i.e., $\mathbf{X} \in \mathbb{R}^{T \times C \times H \times W}$. A model with learnable parameters $\theta$ then learns a mapping $\mathcal{N}_{\theta} : \mathbf{X}^{t,T} \mapsto \mathbf{Y}^{t+1,T'}$ by extracting combined spatial and temporal dependencies. In this formalization, the entire transport problem is reduced to multichannel spatiotemporal arrays, and the surrogate is no longer an explicit tendency operator. Instead, it becomes a spatiotemporal sequence model, often realized through a recurrent architectures, 3D Convolutional Neural Networks, or transformer architectures that maps the recent history of atmospheric states directly to the tracer concentration field at the next time step~\cite{tran2015learning, shi2015convolutional, bertasius2021timesformer, arnab2021vivit}
 
     \subsection{Dataset Description}
         To train the ML model, the NASA GISS-E3 (ModelE) was run with prescribed sea surface temperature (SST) and sea ice fraction for three different time periods. First, the pre-industrial era from 1851 to 1853 (3 years), yielding 3 years of data. For this period, monthly-averaged BCB concentrations were interpolated to daily intervals, as no daily inventory exists for this time period. The second dataset spans 2010 to 2012 (3 years). This period falls within the satellite era, so daily BCB concentrations were used for this run. The third period covers 2020 and 2021 (2 years). This run is also based on daily BCB concentrations considered for testing the model on entirely outside the training domain.
@@ -153,11 +117,11 @@
         \end{figure}
 
     \subsection{Model Architecture}
-        We propose a spatiotemporal ML approach to project the effects of interactive emissions on climate forcing (see Figure~\ref{fig:model_architecture}). Before data is fed into the spatiotemporal model, they are passed into a preprocessing module for spatial feature extraction and modality fusion. To do this, we employ spatial encoders~\cite{tan2023temporal} that process two data modalities (2D surface variables and 3D forcing) individually and transform them into an identical dimension in the latent space. Results are then fused via Spatial Feature Transform (SFT)~\cite{wang2018recovering} which generally modulates (affine transform) the 3D forcing given 2D variables. Since the horizontal dimensions are preserved throughout this processing pipeline, the output maintains four dimensions (i.e., time, features, latitude, and longitude) enabling seamless integration with any spatiotemporal model architecture regardless of their spatial domain representation approach~\cite{tan2023openstl}. Here, we employ ConvLSTM~\cite{shi2015convolutional} with a rectangular latitude-longitude grid representation, as extensive prior research has established effective approaches in this area and spatial representation was not our primary focus. % The details of the model architecture is elaborated in the Appendix~\ref{sec:appendix-2}.
+        We propose a spatiotemporal ML approach to project the effects of interactive emissions on climate forcing (see Figure~\ref{fig:model_architecture}). Before data is fed into the spatiotemporal model, they are passed into a preprocessing module for spatial feature extraction and modality fusion. To do this, we employ spatial encoders~\cite{tan2023temporal} that process two data modalities (2D surface variables and 3D forcing) individually and transform them into an identical dimension in the latent space. Results are then fused via Spatial Feature Transform (SFT)~\cite{wang2018recovering} which generally modulates (affine transform) the 3D forcing given 2D variables. Since the horizontal dimensions are preserved throughout this processing pipeline, the output maintains four dimensions (i.e., time, features, latitude, and longitude) enabling seamless integration with any spatiotemporal model architecture regardless of their spatial domain representation approach~\cite{tan2023openstl}. Here, we employ ConvLSTM~\cite{shi2015convolutional} with a rectangular latitude-longitude grid representation, as extensive prior research has established effective approaches in this area and spatial representation was not our primary focus. The details of the model architecture is elaborated in the Appendix~\ref{sec:appendix-2}.
         
         \begin{figure}[htbp]
             \centering
-            \includegraphics[width=0.7\linewidth]{figs/model_architecture.png}
+            \includegraphics[width=\linewidth]{figs/model_architecture.png}
             \caption{Spatiotemporal ML model, equipped with spatial feature extraction and modality fusion.}
             \label{fig:model_architecture}
         \end{figure}
@@ -237,7 +201,7 @@
         \end{figure}
 
     \subsection{BCB Global Average Over Time} \label{sec:result-scatter}
-        Figures~\ref{fig:global_average_2020} and~\ref{fig:global_average_2021} compare the global average BCB concentrations predicted by the ML model against corresponding ground truth values for 2020 and 2021, respectively (equivalent results for 1853 and 2012 are provided in Appendix~\ref{sec:appendix-2}). The analysis focuses on 2020 and 2021 to evaluate the model's predictive performance on years entirely outside the training domain. Furthermore, 2021 represents one of the most extreme cases of BCB concentration, exhibiting unprecedentedly high values. This comparison evaluates three distinct pressure levels: Level-1 (979 hPa), Level-10 (888.5 hPa), and Level-20 (656 hPa).
+        Figures~\ref{fig:global_average_2020} and~\ref{fig:global_average_2021} compare the global average BCB concentrations predicted by the ML model against corresponding ground truth values for 2020 and 2021, respectively (equivalent results for 1853 and 2012 are provided in Appendix~\ref{sec:appendix-3}). The analysis focuses on 2020 and 2021 to evaluate the model's predictive performance on years entirely outside the training domain. Furthermore, 2021 represents one of the most extreme cases of BCB concentration, exhibiting unprecedentedly high values. This comparison evaluates three distinct pressure levels: Level-1 (979 hPa), Level-10 (888.5 hPa), and Level-20 (656 hPa).
 
         Figures~\ref{fig:global_average_2020}a, c, and e present scatter plots of these comparisons for 2020.  Figures~\ref{fig:global_average_2020}b, d, and f compare the global averages of the model outputs and ground truth values throughout 2020. The results indicate good model performance across all evaluated pressure levels. During the peak period (July through October), the model underestimates the global average BCB concentration at the first pressure level; however, predictions at higher altitudes remain highly consistent with the ground truth. This suggests that the model successfully captures the vertical transport of BCB from the lower to upper troposphere, despite reduced accuracy in representing extreme surface-level events.
         
@@ -337,9 +301,6 @@
     %     \label{eq:transport_model}
     % \end{equation}
 
-% \section{Model Architecture} \label{sec:appendix-2}
-    % The model receives 2D and 3D data separately ((see Figure~\ref{fig:model_architecture}). two different spatial encoders were used to process two different data modalities (2D and 3D variables). Suppose a batch of 3D input tensors $\mathbf{\beta} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{\beta}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each 3D variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D variables with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the identical number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features. In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
-
     \subsection{Atmospheric Levels and Corresponding Pressure Values}
         Throughout this paper, we refer to atmospheric levels using both pressure values (in hPa) and level nomenclature interchangeably. Table~\ref{tab:pressure_levels} provides the complete mapping between the 20 atmospheric levels and their corresponding pressure values used in our analysis. Readers can reference this table to identify the specific atmospheric level when pressure values are mentioned in the text, figures, or discussions of model performance across different vertical layers of the atmosphere.
 
@@ -360,7 +321,11 @@
             \end{tabular}
         \end{table}
 
-\section{Results} \label{sec:appendix-2}
+\section{Model Architecture} \label{sec:appendix-2}
+    The model receives 2D and 3D data separately (see Figure~\ref{fig:model_architecture}). Two different spatial encoders were used to process two different data modalities (2D and 3D variables). Suppose a batch of 3D input tensors $\mathbf{\beta} \in \mathbb{R}^{B \times T \times V \times L \times H \times W}$, where the batch size is $B = |\mathbf{\beta}|$, $V$ represents the number of 3D variables, and $L$ represents the number of associated levels for each 3D variable. In the spatial encoder, we reshape the sequential input data from $B \times T \times V \times L \times H \times W$ to $(B \times T) \times (V \times L) \times H \times W$ so that only spatial correlations are taken into account. The same procedure is applied to 2D variables with the number of levels equal to 1. The outputs of the 3D and 2D encoders are $(B \times T) \times F_1 \times H \times W$ and $(B \times T) \times F_2 \times H \times W$, respectively, where $F_1 = F_2$ is the identical number of channels in the latent space. The outputs of the encoders are fused via Spatial Feature Transform (SFT). In fact, SFT modulates 3D features conditioned on 2D features. In other words, the SFT layer generates affine transformation parameters for spatial-wise feature modulation. SFT layers can be trained end-to-end together with the network using the same loss function. This module is designed for spatial feature extraction and modality fusion. The output of this step is in the shape of $B \times T \times F_m \times H \times W$, which can be fed into any spatio-temporal ML model to impose the effect of time evolution on the latent features and map them to the target variable.
+
+
+\section{Results} \label{sec:appendix-3}
     % TODO: add discussion
     \subsection{BCB Global Average Over Time}
     Figures~\ref{fig:global_average_1853}, and~\ref{fig:global_average_2012} show the same analysis presented in Section~\ref{sec:result-scatter}. In these figures, we compare the BCB global averages predicted by ML model with the corresponding ground truth values for 1853, and 2012, respectively. This comparison is conducted across three distinct pressure levels: level-1 (979 hPa), level-10 (888.5 hPa), and level-20 (656 hPa).
