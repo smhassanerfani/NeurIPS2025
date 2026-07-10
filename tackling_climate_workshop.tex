@@ -60,7 +60,9 @@
 \section{Methodology}
     In this work, we emulate the prediction of BCB (Black Carbon from Biomass Burning) transport for the first 20 vertical levels (up to 600 hPa) of the NASA GISS-E3 ESM model (tropospheric portion). Specifically, we aim to forecast the 3D field of BCB concentration in the atmosphere at timestep $t$, given meteorological inputs (e.g., wind components and precipitation) and BCB surface fluxes from the previous 47 timesteps. The list of candidate variables, their description, units and dimensions on spatial domain are showed in Appendix~\ref{sec:appendix-1}.
 
-    \subsection{Atmospheric Tracer Transport}
+   As discussed in the introduction, the conventional approach to this problem relies on autoregressive rollout,  in which a model is trained to predict the next timestep from the current state and then applied iteratively to generate future states. However, this approach is susceptible to error accumulation over time, especially in long-term forecasts. To address this, we propose a spatiotemporal ML approach that captures both spatial and temporal dependencies in the data, allowing for more accurate and stable predictions over extended periods. In the following section, we first formalize the problem in the autoregressive rollout setting, then present our spatiotemporal ML framework.
+
+    \subsection{Atmospheric Tracer Transport: Autoregressive Rollout}
         When numerically integrating the continuity equation for a tracer $\mu$ over a discrete grid, the evolution is typically split into horizontal advection, vertical convection, and sink/source terms as follows: 
 
         \begin{equation}
@@ -91,8 +93,18 @@
 
         \noindent
         This procedure naturally maps to an \textbf{autoregressive rollout}: the learned tendency operator is applied repeatedly, step-by-step, to evolve the prognostic state forward in time. This approach is thoroughly investigated in~\cite{benson2025atmospheric}.
+    
+    \subsection{Atmospheric Tracer Transport: Spatiotemporal Predictive Learning}
+        A data-driven perspective motivates a completely different framing: the spatiotemporal predictive learning approach~\cite{erfani2026spatiotemporal, erfani2026genealogy}. Given a sequence $\mathbf{X}^{t,T} = \{x_{t-T+1}, \dots, x_t\}$ representing the past $T$ frames up to time $t$, model aims to predict the subsequent $T'$ frames $\mathbf{Y}^{t+1,T'} = \{x_{t+1}, \dots, x_{t+T'}\}$. Here, each frame $x_i \in \mathbb{R}^{C \times H \times W}$ is treated as an image with $C$ channels, height $H$, and width $W$. In practice, these sequences are represented as high-dimensional tensors, $\mathbf{X} \in \mathbb{R}^{T \times C \times H \times W}$. Under a free-form spatiotemporal formulation, this problem is defined as a sequence-to-sequence prediction:
 
-        However, a data-driven perspective motivates a completely different framing: the spatiotemporal predictive learning approach~\cite{erfani2026spatiotemporal, erfani2026genealogy}. Given a sequence $\mathbf{X}^{t,T} = \{x_{t-T+1}, \dots, x_t\}$ representing the past $T$ frames up to time $t$, model aims to predict the subsequent $T'$ frames $\mathbf{Y}^{t+1,T'} = \{x_{t+1}, \dots, x_{t+T'}\}$. Here, each frame $x_i \in \mathbb{R}^{C \times H \times W}$ is treated as an image with $C$ channels, height $H$, and width $W$. In practice, these sequences are represented as high-dimensional tensors, i.e., $\mathbf{X} \in \mathbb{R}^{T \times C \times H \times W}$. A model with learnable parameters $\theta$ then learns a mapping $\mathcal{N}_{\theta} : \mathbf{X}^{t,T} \mapsto \mathbf{Y}^{t+1,T'}$ by extracting combined spatial and temporal dependencies. In this formalization, the entire transport problem is reduced to multichannel spatiotemporal arrays, and the surrogate is no longer an explicit tendency operator. Instead, it becomes a spatiotemporal sequence model, often realized through a recurrent architectures, 3D Convolutional Neural Networks, or transformer architectures that maps the recent history of atmospheric states directly to the tracer concentration field at the next time step~\cite{tran2015learning, shi2015convolutional, bertasius2021timesformer, arnab2021vivit}
+        \begin{equation}
+            \mathcal{F} : \mathbf{X}^{t,T} \mapsto \mathbf{Y}^{t+1,T'}, \qquad
+            \{x_{t-k}, \ldots, x_t\} \mapsto \{x_{t+\Delta t}, \ldots, x_{t+m\Delta t}\}
+            \label{eq:seq2seq}
+        \end{equation}
+
+        \noindent
+        Thus, an ML model with learnable parameters $\theta$ then learns a mapping $\mathcal{N}_{\theta} : \mathbf{X}^{t,T} \mapsto \mathbf{Y}^{t+1,T'}$ by extracting combined spatial and temporal dependencies. In this formalization, the entire transport problem is reduced to multichannel spatiotemporal arrays, and the surrogate is no longer an explicit tendency operator. Instead, it becomes a spatiotemporal sequence model, often realized through a recurrent architectures~\cite{shi2015convolutional}, 3D Convolutional Neural Networks~\cite{tran2015learning}, or transformer architectures~\cite{bertasius2021timesformer, arnab2021vivit} that maps the recent history of atmospheric states directly to the tracer concentration field at the next time step.
 
     \subsection{Dataset Description}
         To train the ML model, the NASA GISS-E3 (ModelE) was run with prescribed sea surface temperature (SST) and sea ice fraction for three different time periods. First, the pre-industrial era from 1851 to 1853 (3 years), yielding 3 years of data. For this period, monthly-averaged BCB concentrations were interpolated to daily intervals, as no daily inventory exists for this time period. The second dataset spans 2010 to 2012 (3 years). This period falls within the satellite era, so daily BCB concentrations were used for this run. The third period covers 2020 and 2021 (2 years). This run is also based on daily BCB concentrations considered for testing the model on entirely outside the training domain.
