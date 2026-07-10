@@ -152,7 +152,7 @@
     \subsection{Experimental Settings}
         The training consists of two tiers. First, the model is trained on data from 1851--1852, comprising 35,040 timesteps, for 50 epochs. The training uses the Adam optimizer with default beta values of 0.9 and 0.999. The loss function combined Mean Squared Error (MSE) and Mean Absolute Error (MAE) with equal weights to balance sensitivity to outliers and overall error magnitude. The initial learning rate of 0.0005 and a Cosine Annealing scheduler is considered for training. To avoid unstable training, the first 10 steps are considered as a warm-up period with a factor of 0.1 and Linear scheduler. In the second tier, the model is then fine-tuned on data from 2010--2011 for 30 epochs using the Adam optimizer with an initial learning rate of $1/5$ of the first tier (i.e., 0.0001) and a Cosine Annealing scheduler. For each round of training, ten percent of the training period is randomly selected as the validation set. However, the entire years of 1853, 2012, 2020, and 2021 are reserved for testing. Therefore, the model is trained on 4 years of data and tested on 4 years, where 2 test years (2020 and 2021) represent entirely different time periods outside the training domain. This configuration provides a crucial capability for climate modeling applications requiring reliable long-term projections, as it evaluates the model's ability to generalize to future climate conditions not seen during training.
        
-\section{Results}
+\section{Results and Discussion}
     Table~\ref{tab:model_comparison} presents the performance comparison of the proposed model in terms of R-squared ($R^2$) across different test periods and pressure levels. The $R^2$ values are computed at each timestep for all 20 pressure levels during the test period by comparing ground truth and predicted 2D fields. The values reported in the table represent the temporal average of $R^2$ across all timesteps for each pressure level. Across all test years, the model performance consistently decreases at higher pressure levels (lower atmospheric pressure). We observe a strong correlation between BCB concentration magnitude and $R^2$ values at each level (e.g., correlation coefficient of 0.92 for the 2012 test period). Two primary factors contribute to this performance degradation:
 
     \begin{table}[htbp]
@@ -196,7 +196,7 @@
         % A wide range of analyses comparing the results in different aspects is presented in Appendix~\ref{sec:appendix-3}.
             
         
-        \begin{figure}[htbp]
+        \begin{figure}[!t]
             \centering
             \includegraphics[width=1\linewidth]{figs/column_burden.png}
             \caption{Annual mean BCB column burden. The first column is the ground truth from ModelE simulations. The second column is the machine learning predictions, and the third column represents the bias (prediction - ground truth).}
@@ -219,7 +219,7 @@
 
         Figures~\ref{fig:global_average_2020}a, c, and e present scatter plots of these comparisons for 2020.  Figures~\ref{fig:global_average_2020}b, d, and f compare the global averages of the model outputs and ground truth values throughout 2020. The results indicate good model performance across all evaluated pressure levels. During the peak period (July through October), the model underestimates the global average BCB concentration at the first pressure level; however, predictions at higher altitudes remain highly consistent with the ground truth. This suggests that the model successfully captures the vertical transport of BCB from the lower to upper troposphere, despite reduced accuracy in representing extreme surface-level events.
         
-        \begin{figure}[htbp]
+        \begin{figure}[!t]
             \centering
             \includegraphics[width=\linewidth]{figs/global_average_2020.png}
             \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2020. (b, d, f) Comparison of global average values of model outputs and ground truth over 2020.}
@@ -228,14 +228,14 @@
 
         Figure~\ref{fig:global_average_2021} presents the same analysis for 2021, a year in which BCB concentration at the first pressure level reached unprecedented heights, approximately three times higher than those observed in 2012 and 2020 during peak periods (July through October). This exceptional increase manifests as model underestimation of extreme events. However, this trend diminishes at higher atmospheric levels and is completely resolved by the 20th level, where concentrations follow patterns more consistent with previous years, allowing the model to accurately capture high peaks. This observation highlights a significant achievement of our model architecture: as evidenced across all examples, patterns at higher atmospheric levels function independently from the first pressure level, where high concentrations of BCB (our target variable) accumulate. We attribute this successful vertical representation to the appropriate architectural provisions in the model structure that account for vertical convection and other mechanisms governing BCB transport across the atmospheric vertical profile.
     
-
-        \begin{figure}[htbp]
+        \begin{figure}[!t]
             \centering
             \includegraphics[width=\linewidth]{figs/global_average_2021.png}
             \caption{(a, c, e) Scatter plot comparing the global averages of model results with ground truth values for 2021. (b, d, f) Comparison of global average values of model outputs and ground truth over 2021.}
             \label{fig:global_average_2021}
         \end{figure}
 
+    While a direct comparison between our proposed spatiotemporal framework and the autoregressive rollout approach would be a natural point of evaluation, we argue that such a comparison is not necessary here. Autoregressive rollout is a well-established paradigm that has been extensively benchmarked for atmospheric modeling in the literature. Rather than duplicating existing efforts, we refer the reader to Benson et al., 2025 who provide a thorough and rigorous investigation of autoregressive rollout specifically in the context of atmospheric tracer transport~\cite{benson2025atmospheric}. Furthermore, we have conducted such a comparison ourselves in a another study, where spatiotemporal and autoregressive models are evaluated under the same controlled conditions allowing for a fair and stable assessment of both paradigms~\cite{erfani2026spatiotemporal}.
 
 \section{Ablation Study}
     We conducted comprehensive ablation studies to evaluate the contributions of individual components in our proposed network architecture. Specifically, we examined the effects of incorporating spatial feature encoders (Encoder), spatial feature transformation for modality fusion (SFT), or removing one or both of these modules. To optimize training resources, each model variant was trained on the entire year of 1852 and evaluated on 2012 data. Table~\ref{tab:ablation_study} presents the performance metrics for different model variants predicting the column burden of BCB, calculated by summing the concentration across all 20 pressure levels for each grid cell. Our results demonstrate that the benchmark model with all components achieves superior performance compared to reduced variants. Removing the SFT module caused a modest decrease in performance, while removing the Encoder module resulted in more significant degradation. Interestingly, the model without both modules slightly outperformed the variant missing only the Encoder, suggesting complex interactions between these architectural components. These findings highlight the critical role of both spatial feature extraction and modality fusion in achieving optimal predictive performance.
@@ -258,7 +258,7 @@
 
     Figure~\ref{fig:ablation_study} compares the vertical profiles of BCB concentration across 20 atmospheric pressure levels for different model variants. The results demonstrate that the full model most accurately follows the ground truth vertical distribution, with notably lower bias compared to variants lacking spatial feature encoders, spatial feature transformation modules, or both. This visual comparison complements the quantitative metrics in Table~\ref{tab:ablation_study}, illustrating that the full model's superior performance extends beyond integrated column burden to accurately representing concentrations at individual pressure levels throughout the atmospheric profile.
     
-    \begin{figure}[htbp]
+    \begin{figure}[!t]
         \centering
         \includegraphics[width=0.5\linewidth]{figs/ablation_study.png}
         \caption{Impact of model components on vertical profiles of BCB concentration across 20 atmospheric levels.}
@@ -270,6 +270,7 @@
     
     Our findings confirm our central hypothesis that ``architectural provisions'' for temporal evolution and vertical atmospheric coupling produce corresponding improvements in model accuracy and physical consistency. These gains demonstrate that architectural design for time and height is crucial, complementing the necessary efforts to respect the Earth's spherical geometry through appropriate projections, multi-mesh graph structures, or the use of spherical harmonic transforms. Thus, future work should focus on developing architectures that simultaneously address temporal evolution, vertical coupling, and spherical geometry to achieve the most accurate and physically consistent predictions of atmospheric composition dynamics.
 
+\newpage
 \bibliographystyle{unsrt}
 \bibliography{ref.bib}
 
