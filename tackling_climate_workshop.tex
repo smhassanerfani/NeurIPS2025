@@ -130,6 +130,15 @@
             \label{fig:conc_sdist_2012}
         \end{figure}
 
+        Figure~\ref{fig:train_test_years} shows the global average of daily BCB emission sources for training and test years. The training years (1851-1852, 2010-2011) are marked by orange shading while the test years (1853, 2012, and 2020-2021) are highlighted by purple shading. As shown, the concentration of BCB emission sources is considerably higher during industrial periods compared to pre-industrial periods (1851 to 1853). In pre-industrial periods (blue line), the values oscillate smoothly as these daily values are calculated by interpolation of monthly averages. The industrial periods show much higher variability, with the 2020-2021 period (green line) exhibiting the most extreme peaks. Notably, the 2021 peaks reach approximately two times higher than the highest values observed in the earlier industrial period (2010-2012, red line).
+
+        \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=\linewidth]{figs/train_test_years.png}
+            \caption{Global average daily BCB emission sources for pre-industrial (blue line, 1851-1853) and industrial periods (red line for 2010-2012, green line for 2020-2021). Training years are highlighted with orange shading and test years with purple shading.}
+            \label{fig:train_test_years}
+        \end{figure}
+
     \subsection{Model Architecture}
         We propose a spatiotemporal ML approach to project the effects of interactive emissions on climate forcing (see Figure~\ref{fig:model_architecture}). Before data is fed into the spatiotemporal model, they are passed into a preprocessing module for spatial feature extraction and modality fusion. To do this, we employ spatial encoders~\cite{tan2023temporal} that process two data modalities (2D surface variables and 3D forcing) individually and transform them into an identical dimension in the latent space. Results are then fused via Spatial Feature Transform (SFT)~\cite{wang2018recovering} which generally modulates (affine transform) the 3D forcing given 2D variables. Since the horizontal dimensions are preserved throughout this processing pipeline, the output maintains four dimensions (i.e., time, features, latitude, and longitude) enabling seamless integration with any spatiotemporal model architecture regardless of their spatial domain representation approach~\cite{tan2023openstl}. Here, we employ ConvLSTM~\cite{shi2015convolutional} with a rectangular latitude-longitude grid representation, as extensive prior research has established effective approaches in this area and spatial representation was not our primary focus. The details of the model architecture is elaborated in the Appendix~\ref{sec:appendix-2}.
         
@@ -142,16 +151,7 @@
 
     \subsection{Experimental Settings}
         The training consists of two tiers. First, the model is trained on data from 1851--1852, comprising 35,040 timesteps, for 50 epochs. The training uses the Adam optimizer with default beta values of 0.9 and 0.999. The loss function combined Mean Squared Error (MSE) and Mean Absolute Error (MAE) with equal weights to balance sensitivity to outliers and overall error magnitude. The initial learning rate of 0.0005 and a Cosine Annealing scheduler is considered for training. To avoid unstable training, the first 10 steps are considered as a warm-up period with a factor of 0.1 and Linear scheduler. In the second tier, the model is then fine-tuned on data from 2010--2011 for 30 epochs using the Adam optimizer with an initial learning rate of $1/5$ of the first tier (i.e., 0.0001) and a Cosine Annealing scheduler. For each round of training, ten percent of the training period is randomly selected as the validation set. However, the entire years of 1853, 2012, 2020, and 2021 are reserved for testing. Therefore, the model is trained on 4 years of data and tested on 4 years, where 2 test years (2020 and 2021) represent entirely different time periods outside the training domain. This configuration provides a crucial capability for climate modeling applications requiring reliable long-term projections, as it evaluates the model's ability to generalize to future climate conditions not seen during training.
-
-        Figure~\ref{fig:train_test_years} shows the global average of daily BCB emission sources for training and test years. The training years (1851-1852, 2010-2011) are marked by orange shading while the test years (1853, 2012, and 2020-2021) are highlighted by purple shading. As shown, the concentration of BCB emission sources is considerably higher during industrial periods compared to pre-industrial periods (1851 to 1853). In pre-industrial periods (blue line), the values oscillate smoothly as these daily values are calculated by interpolation of monthly averages. The industrial periods show much higher variability, with the 2020-2021 period (green line) exhibiting the most extreme peaks. Notably, the 2021 peaks reach approximately two times higher than the highest values observed in the earlier industrial period (2010-2012, red line).
-
-        \begin{figure}[htbp]
-            \centering
-            \includegraphics[width=\linewidth]{figs/train_test_years.png}
-            \caption{Global average daily BCB emission sources for pre-industrial (blue line, 1851-1853) and industrial periods (red line for 2010-2012, green line for 2020-2021). Training years are highlighted with orange shading and test years with purple shading.}
-            \label{fig:train_test_years}
-        \end{figure}
-        
+       
 \section{Results}
     Table~\ref{tab:model_comparison} presents the performance comparison of the proposed model in terms of R-squared ($R^2$) across different test periods and pressure levels. The $R^2$ values are computed at each timestep for all 20 pressure levels during the test period by comparing ground truth and predicted 2D fields. The values reported in the table represent the temporal average of $R^2$ across all timesteps for each pressure level. Across all test years, the model performance consistently decreases at higher pressure levels (lower atmospheric pressure). We observe a strong correlation between BCB concentration magnitude and $R^2$ values at each level (e.g., correlation coefficient of 0.92 for the 2012 test period). Two primary factors contribute to this performance degradation:
 
